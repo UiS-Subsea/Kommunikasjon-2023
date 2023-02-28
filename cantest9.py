@@ -43,41 +43,52 @@ def to_json(input):
 
 #builds packs for canbus
 def packetBuild(tags):
+  print("her")
   canID, *idData = tags
   idDataByte = []
+  print(tags)
+  print(type(tags))
+  print(canID)
+  print(idData)
+  print("her4")
   for data in idData:
+    print(data)
     try:
+      print("i try")
+      print(data[0])
       idDataByte += struct.pack(can_types[data[0]], *data[1:])
+      print("slice")
     except struct.error as e:
       print(f"Error: {e}")
       print(f"data={data}, format={data[0]}, value={data[1:]}")
       print(f"idDataByte={idDataByte}")
-
+  print("før retur packetbuild")
   return can.Message(arbitration_id=canID, data=idDataByte, is_extended_id=False)
 
 #decodes packs
 def packetDecode(msg):
   canID = msg.arbitration_id
   dataByte = msg.data
-  try:
-    if canID == 100:
-      pack1 = get_num("int16", dataByte[0:2])
-      pack2 = get_num("int16", dataByte[2:4])
-      pack3 = get_num("int16", dataByte[4:6])
-      pack4 = get_num("int16", dataByte[6:8])
-      json_dict = {"name10": (pack1, pack2, pack3, pack4)}
-    elif canID == 52:
-      pack1 = get_num("int32", dataByte[0:4])
-      pack2 = get_num("int8",  dataByte[4])
-      pack3 = get_num("uint8", dataByte[5])
-      pack4 = get_num("uint16", dataByte[6:8])
-      json_dict = {"name52": (pack1, pack2, pack3, pack4)}
-    else:
-      print(f"Unknown CanID: {canID} recived from ROV system")
-      return to_json("Unknown CanID recived from ROV system")
-    return to_json(json_dict)
-  except TypeError as e:
+  print(msg)
+  if 1 < canID < 150:
+    pack1 = get_num("int16", dataByte[0:2])
+    pack2 = get_num("int16", dataByte[2:4])
+    pack3 = get_num("int16", dataByte[4:6])
+    pack4 = get_num("int16", dataByte[6:8])
+    json_dict = {canID: (pack1, pack2, pack3, pack4)}
+  elif canID == 97:
+    pack1 = get_num("int32", dataByte[0:4])
+    pack2 = get_num("int8",  dataByte[4])
+    pack3 = get_num("uint8", dataByte[5])
+    pack4 = get_num("uint16", dataByte[6:8])
+    json_dict = {canID: (pack1, pack2, pack3, pack4)}
+  else:
+    #print(f"Unknown CanID: {canID} recived from ROV system")
+    #return to_json("Unknown CanID:" {canID} "recived from ROV system")
+    #return to_json({"ID unknown", "0" ,"0" ,"0"})
+    return f"Unknown CanID: {canID} recived from ROV system"
 
+  return to_json(json_dict)
 
 # Reads data from network port
 def netThread(netHandler, netCallback, flag):
@@ -85,14 +96,15 @@ def netThread(netHandler, netCallback, flag):
     flag['Net'] = True
     while flag['Net']:
         try:
-            msg = netHandler.receive()
-            if msg == b"" or msg is None:
+            melding = netHandler.receive()
+            #melding = network_socket.recv(1024) #  OLD
+            if melding == b"" or melding is None:
                 continue
             else:
-                #print(melding)
-                netCallback(msg)
+                print(melding)
+                netCallback(melding)
         except ValueError as e:
-            print(f'Feilkode i network thread feilmelding: {e}\n\t{msg}')
+            print(f'Feilkode i network thread feilmelding: {e}\n\t{melding}')
             break
     netHandler.exit()
     print(f'Network thread stopped')
@@ -101,13 +113,13 @@ def netThread(netHandler, netCallback, flag):
 class ComHandler:
   def __init__(self, 
                ip:str='0.0.0.0',
-               port:int=5010,
+               port:int=6900,
                canifaceType:str='socketcan',
                canifaceName:str='can0') -> None:
     self.canifaceType  = canifaceType
     self.canifaceName  = canifaceName
     self.status = {'Net': False, 'Can': False}
-    self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
+    self.canFilters = [{"can_id":0x60 , "can_mask":0xE0, "extended":False}]
     #activate can in os sudo ip link set can0 type can bitrate 500000 etc.
     #check if can is in ifconfig then
     self.canInit()
@@ -141,16 +153,17 @@ class ComHandler:
                 continue
             else:
                 message = json.loads(message)
+                #print(message)
                 for item in message:
                     if item[0] < 200:
+                 #       print(item[0])
+                 #      print(item[1])
                         if self.status['Can']:
                             if item[0] == 100: 
-                                msg = {item[0],
-                                   {'int16', int(item[1])},
-                                   {'int16', int(item[2])},
-                                   {'int16', int(item[3])},
-                                   {'int16', int(item[4])}
-                                   }
+                                print(type(item[0]))
+                                print(type(item[1][0]))
+                                msg = (item[0], ("int16", item[1][0]), ("int16", item[1][1]), ("int16", item[1][2]), ("int16", item[1][3]))
+                                print("her2")
                                 self.sendPacket(msg)
                             elif item[0] == 64:
                                 msg = {item[0],
@@ -160,7 +173,7 @@ class ComHandler:
                         else:
                             self.netHandler.send(to_json("Error: Canbus not initialised"))
         except Exception as e:
-            print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
+            print(f'Feilkode i network_callback, feilmelding: {e}\n\t{message}')
 
   def canInit(self):
     self.bus = can.Bus(
@@ -169,20 +182,13 @@ class ComHandler:
       receive_own_messages  = False,
       fd                    = False)
     self.bus.set_filters(self.canFilters)
-    #self.listner = can.Listener()
-#    try:
-#      subprocess.run("sudo ip link set can0 up type can bitrate 500000", shell=True, check=True)
-#    except subprocess.CalledProcessError as error:
-#      if "[sudo]  password for jetson" in error.stderr.decode():
-#        print("Error: Password is required to run the command")
-#      else:
-#        print("Error: Failed to run the command")
     self.status['Can'] = True
     self.notifier = can.Notifier(self.bus, [self.readPacket])
     self.timeout = 0.1 # todo kan denne fjernes?
   
   def sendPacket(self, tag):
     packet = packetBuild(tag)
+    print("her5")
     assert self.bus is not None
     try:
       self.bus.send(packet)
@@ -191,12 +197,7 @@ class ComHandler:
 
   def readPacket(self, can):
         self.bus.socket.settimeout(0)
-        try:
-          msg = packetDecode(can)
-          self.netHandler.send(msg)
-        except Exception as e:
-          raise e
-
+        self.netHandler.send(packetDecode(can))
 
 if __name__ == "__main__":
 # tag = (type, value)
@@ -208,6 +209,7 @@ if __name__ == "__main__":
 # tags = (id, tag0
 # tag1, tag2, tag3, tag4, tag5, tag6, tag7) ex. with int8 or uint8
   tags = (10, tag0, tag1, tag2, tag3, tag4)
+  print(tags)
   c = ComHandler()
   while True:
     time.sleep(0.1)

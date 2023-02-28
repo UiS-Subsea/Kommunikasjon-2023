@@ -95,7 +95,7 @@ class Network:
             time.sleep(0.3)
         try:
             if type(bytes_to_send) != bytes:
-                print(f"tried sending something that was not bytes: {bytes_to_send = } type: {type(bytes_to_send)}")
+                print(f"tried sending something that was not bytes: {bytes_to_send} type: {type(bytes_to_send)}")
                 exit(1)
             self.conn.sendall(bytes_to_send)
         except (socket.error, BrokenPipeError)  as e:
