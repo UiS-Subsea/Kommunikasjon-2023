@@ -1,5 +1,3 @@
-
-
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Jetson Device-tree overlay for MCP2515 SPI to CAN, PWM and I2C
