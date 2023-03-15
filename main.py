@@ -8,14 +8,14 @@ import threading
 import json
 import os
 import communicationHandler
-from STTS75_driver import STTS75
 os.chdir(os.path.dirname(os.path.abspath(__file__))) # Bytter working directory til den nåværende slik at programmet kan startes utenfra mappa
 
-# Our main loop for both programs
+# main loop
 def main_loop():
     c = communicationHandler.ComHandler()
     while True:
         time.sleep(1)
+        
 
 if __name__ == "__main__":
     main_loop()

@@ -18,6 +18,7 @@ import sys
 import os
 import subprocess
 from network_handler import Network
+from STTS75_driver import STTS75
 
 
 can_types = {
@@ -177,6 +178,15 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
           time.sleep(0.2)
     print("Heartbeat thread stopped")
 
+def i2cThread(netHandler, STTS75, systemFlag):
+    print("i2c Thread started")
+    while systemFlag['Net']:
+       temp = STTS75.read_temp()
+       msg = toJson{"Temp on Jetson": temp}
+       netHandler.send(msg)
+       time.sleep(2)
+    print("i2c Thread stopped")
+
 class ComHandler:
   def __init__(self, 
                ip:str='0.0.0.0',
@@ -196,6 +206,7 @@ class ComHandler:
     self.connectPort = port
     self.netInit()
     self.heartBeat()
+    self.i2cInit()
 
   def netInit(self):
     self.netHandler = Network(is_server=True, 
@@ -274,6 +285,11 @@ class ComHandler:
   def heartBeat(self):
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
     self.heartBeatThread.start()
+  
+  def i2cInit(self):
+     self.STTS75 = STTS75() 
+     self.i2cThread = threading.Thread(name="i2cThread" ,target=i2cThread,daemon=True, args=(self.netHandler, self.STTS75, self.status))
+     self.i2cThread.start()
 
 
 if __name__ == "__main__":
