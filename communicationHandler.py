@@ -74,23 +74,24 @@ def packetBuild(tags):
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
 #decodes packs
-def packetDecode(msg, ucFlag):
+def packetDecode(msg, ucFlags):
   canID = msg.arbitration_id
   dataByte = msg.data
+  hbIds = [155, 156, 157, 158, 159]
   try:
-    if 155 <= canID <= 159:
+    if canID in hbIds:
       pack = dataByte[0:6].decode('utf-8')
       jsonDict = {canID: (pack)}
       if canID == 155:
-        ucFlag['Reg'] = True
+        ucFlags['Reg'] = True
       elif canID == 156:
-        ucFlag['Sensor'] = True
+        ucFlags['Sensor'] = True
       elif canID == 157:
-        ucFlag['12Vman'] = True
+        ucFlags['12Vman'] = True
       elif canID == 158:
-        ucFlag['12Vthr'] = True
+        ucFlags['12Vthr'] = True
       elif canID == 159:
-        ucFlag['5V'] = True
+        ucFlags['5V'] = True
     elif 1 < canID < 150:
       pack1 = getNum("int16", dataByte[0:2])
       pack2 = getNum("int16", dataByte[2:4])
@@ -108,7 +109,6 @@ def packetDecode(msg, ucFlag):
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
   except TypeError as e:
      jsonDict = {"Error": e}
-  print(jsonDict)
   return toJson(jsonDict)
 
 
@@ -141,9 +141,9 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
       time.sleep(1)
       for flag in ucFlags:
         if not ucFlags[flag]:
-          msg = toJson({"Alarm": f" uC {flag} not responding on CANBus"})
+          msg = toJson({"Alarm": f"uC {flag} not responding on CANBus"})
           netHandler.send(msg)
-          time.sleep(0.1)
+          time.sleep(0.2)
     print("Heartbeat thread stopped")
 
 class ComHandler:
@@ -221,7 +221,7 @@ class ComHandler:
     self.bus.set_filters(self.canFilters)
     self.status['Can'] = True
     self.notifier = can.Notifier(self.bus, [self.readPacket])
-    self.timeout = 0.1 # todo kan denne fjernes?
+    #self.timeout = 0.1 # todo kan denne fjernes?
 
   
   def sendPacket(self, tag):
@@ -247,14 +247,7 @@ class ComHandler:
 
 if __name__ == "__main__":
 # tag = (type, value)
-  tag0 = ("int16", 16550)
-  tag1 = ("int8", 120)
-  tag2 = ("uint8", 240)
-  tag3 = ("uint16", 50000 )
-  tag4 = ("int16", -20000)
-# tags = (id, tag0
-# tag1, tag2, tag3, tag4, tag5, tag6, tag7) ex. with int8 or uint8
-  tags = (10, tag0, tag1, tag2, tag3, tag4)
+# tags = (id, tag0, tag1, tag2, tag3, tag4, tag5, tag6, tag7) ex. with int8 or uint8
   c = ComHandler()
   while True:
     time.sleep(0.1)
