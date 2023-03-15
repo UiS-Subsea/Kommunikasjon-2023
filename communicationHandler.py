@@ -138,6 +138,7 @@ class ComHandler:
     self.connectIp = ip
     self.connectPort = port
     self.netInit()
+    self.heartBeat()
 
   def netInit(self):
     self.netHandler = Network(is_server=True, 
@@ -195,7 +196,6 @@ class ComHandler:
     self.bus.set_filters(self.canFilters)
     self.status['Can'] = True
     self.notifier = can.Notifier(self.bus, [self.readPacket])
-    self.heartBeat()
     self.timeout = 0.1 # todo kan denne fjernes?
   
   def sendPacket(self, tag):
