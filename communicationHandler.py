@@ -66,6 +66,7 @@ def packetBuild(tags):
         print(f"data={data}, format={data[0]}, value={data[1:]}")
         print(f"idDataByte={idDataByte}")
     msg = idDataByte
+  print(msg)
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
 #decodes packs
@@ -93,6 +94,7 @@ def packetDecode(msg):
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
   except TypeError as e:
      jsonDict = {"Error": e}
+  print(jsonDict)
   return toJson(jsonDict)
 
 
@@ -113,7 +115,7 @@ def netThread(netHandler, netCallback, flag):
     netHandler.exit()
     print(f'Network thread stopped')
 
-def hbThread(netHandler, canSend, flag):
+def hbThread(canSend, flag):
    print("Heartbeat thread started")
    while flag['Can']:
       canSend(63)
@@ -125,8 +127,6 @@ def hbThread(netHandler, canSend, flag):
       canSend(159)
       time.sleep(2)
    print("Heartbeat thread stopped")
-
-
 
 
 class ComHandler:
@@ -191,7 +191,7 @@ class ComHandler:
                                    }
                                 self.sendPacket(msg)
                         else:
-                            self.netHandler.send(to_json("Error: Canbus not initialised"))
+                            self.netHandler.send(toJson("Error: Canbus not initialised"))
         except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
@@ -223,7 +223,7 @@ class ComHandler:
           raise e
         
   def heartBeat(self):
-        self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status))
+        self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.sendPacket, self.status))
 
 
 if __name__ == "__main__":
