@@ -53,11 +53,12 @@ def toJson(input):
 
 #builds packs for canbus
 def packetBuild(tags):
-  canID, *idData = tags
-  idDataByte = []
-  if canID == (63 or 95 or 127 or 159):
-     msg = "marco/n"
+  if tags == (63 or 95 or 125 or 126 or 127): 
+    canID = tags
+    msg = 'marco/n'
   else:
+    canID, *idData = tags
+    idDataByte = []
     for data in idData:
       try:
         idDataByte += struct.pack(can_types[data[0]], *data[1:])
@@ -65,8 +66,8 @@ def packetBuild(tags):
         print(f"Error: {e}")
         print(f"data={data}, format={data[0]}, value={data[1:]}")
         print(f"idDataByte={idDataByte}")
-    msg = idDataByte
-  print(msg)
+      msg = idDataByte
+    print(msg)
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
 #decodes packs
@@ -118,18 +119,17 @@ def netThread(netHandler, netCallback, flag):
 def hbThread(canSend, flag):
     print("Heartbeat thread started")
     while flag['Can']:
-      canSend('hb63')
+      canSend(63)
       time.sleep(0.1)
-      canSend('hb95')
+      canSend(95)
       time.sleep(0.1)
-      canSend('hb125')
+      canSend(125)
       time.sleep(0.1)
-      canSend('hb126')
+      canSend(126)
       time.sleep(0.1)
-      canSend('hb127')
+      canSend(127)
       time.sleep(2)
     print("Heartbeat thread stopped")
-
 
 class ComHandler:
   def __init__(self, 
