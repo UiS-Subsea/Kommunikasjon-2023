@@ -53,7 +53,7 @@ def toJson(input):
 
 #builds packs for canbus
 def packetBuild(tags):
-  if tags == (63 or 95 or 125 or 126 or 127): 
+  if tags in [63, 95, 125, 126, 127]: 
     canID = tags
     msg = bytearray('marco/n', 'utf-8')
   else:
