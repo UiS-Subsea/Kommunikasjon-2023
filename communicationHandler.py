@@ -55,32 +55,39 @@ def toJson(input):
 def packetBuild(tags):
   canID, *idData = tags
   idDataByte = []
-  for data in idData:
-    try:
-      idDataByte += struct.pack(can_types[data[0]], *data[1:])
-    except struct.error as e:
-      print(f"Error: {e}")
-      print(f"data={data}, format={data[0]}, value={data[1:]}")
-      print(f"idDataByte={idDataByte}")
-  return can.Message(arbitration_id=canID, data=idDataByte, is_extended_id=False)
+  if canID == (63 or 95 or 127 or 159):
+     msg = "marco/n"
+  else:
+    for data in idData:
+      try:
+        idDataByte += struct.pack(can_types[data[0]], *data[1:])
+      except struct.error as e:
+        print(f"Error: {e}")
+        print(f"data={data}, format={data[0]}, value={data[1:]}")
+        print(f"idDataByte={idDataByte}")
+    msg = idDataByte
+  return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
 #decodes packs
 def packetDecode(msg):
   canID = msg.arbitration_id
   dataByte = msg.data
   try:
-    if canID == 100:
+    if 155 <= canID <= 159:
+       pack = dataByte[0:6].decode('utf-8')
+       jsonDict = {canID: (pack)}
+    elif 1 < canID < 150:
       pack1 = getNum("int16", dataByte[0:2])
       pack2 = getNum("int16", dataByte[2:4])
       pack3 = getNum("int16", dataByte[4:6])
       pack4 = getNum("int16", dataByte[6:8])
-      jsonDict = {"name10": (pack1, pack2, pack3, pack4)}
+      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
     elif canID == 52:
       pack1 = getNum("int32", dataByte[0:4])
       pack2 = getNum("int8",  dataByte[4])
       pack3 = getNum("uint8", dataByte[5])
       pack4 = getNum("uint16", dataByte[6:8])
-      jsonDict = {"name52": (pack1, pack2, pack3, pack4)}
+      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
@@ -131,7 +138,8 @@ class ComHandler:
     self.canifaceType  = canifaceType
     self.canifaceName  = canifaceName
     self.status = {'Net': False, 'Can': False}
-    self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
+    #self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
+    self.canFilters = [{"can_id" : 0x00 , "can_mask" : 0x00, "extended" : False }]
     #activate can in os sudo ip link set can0 type can bitrate 500000 etc.
     #check if can is in ifconfig then
     self.canInit()
