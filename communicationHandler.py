@@ -140,9 +140,10 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
          time.sleep(0.1)
       time.sleep(1)
       for flag in ucFlags:
+        print(ucFlags[flag])
         if not ucFlags[flag]:
+          print(ucFlags[flag])
           netHandler.send(toJson({"Alarm": f" uC {flag} not responding to heartbeat"}))
-          time.sleep(0.1)
       print(ucFlags)
     print("Heartbeat thread stopped")
 
