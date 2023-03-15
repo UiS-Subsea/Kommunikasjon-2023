@@ -223,7 +223,8 @@ class ComHandler:
           raise e
         
   def heartBeat(self):
-        self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.sendPacket, self.status))
+    print("Trying to start hb thread")
+    self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.sendPacket, self.status))
 
 
 if __name__ == "__main__":
