@@ -141,12 +141,9 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
       time.sleep(1)
       for flag in ucFlags:
         if not ucFlags[flag]:
-          print(f"in hb if {ucFlags[flag]}")
-          msg = toJson({"Alarm": f" uC {flag} not responding to heartbeat"})
-          print(msg)
+          msg = toJson({"Alarm": f" uC {flag} not responding on CANBus})
           netHandler.send(msg)
-          print("hb alarm sent")
-      print(ucFlags)
+          time.sleep(0.1)
     print("Heartbeat thread stopped")
 
 class ComHandler:
