@@ -132,7 +132,7 @@ def netThread(netHandler, netCallback, flag):
 def hbThread(netHandler, canSend, flag, ucFlag):
     print("Heartbeat thread started")
     while flag['Can']:
-      ucFlag['Regulering'] = False
+      ucFlag['Reg'] = False
       canSend(63)
       time.sleep(0.1)
       ucFlag['Sensor'] = False
@@ -148,8 +148,9 @@ def hbThread(netHandler, canSend, flag, ucFlag):
       canSend(127)
       time.sleep(1)
       for item in ucFlag:
+         time.sleep(0.5)
          if ucFlag[item] == False:
-           netHandler.send(toJson(f"Alarm:{item} not active \n"))
+           netHandler.send(toJson(f"Alarm: uC for {item} not responding to heartbeat"))
     print("Heartbeat thread stopped")
 
 class ComHandler:
