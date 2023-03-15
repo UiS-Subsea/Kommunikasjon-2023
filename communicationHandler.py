@@ -55,7 +55,7 @@ def toJson(input):
 def packetBuild(tags):
   if tags == (63 or 95 or 125 or 126 or 127): 
     canID = tags
-    msg = 'marco/n'
+    msg = bytearray('marco/n', 'utf-8')
   else:
     canID, *idData = tags
     idDataByte = []
