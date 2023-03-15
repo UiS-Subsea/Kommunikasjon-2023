@@ -129,28 +129,21 @@ def netThread(netHandler, netCallback, flag):
     netHandler.exit()
     print(f'Network thread stopped')
 
-def hbThread(netHandler, canSend, flag, ucFlag):
+def hbThread(netHandler, canSend, systemFlag, ucFlags):
     print("Heartbeat thread started")
-    while flag['Can']:
-      ucFlag['Reg'] = False
-      canSend(63)
-      time.sleep(0.1)
-      ucFlag['Sensor'] = False
-      canSend(95)
-      time.sleep(0.1)
-      ucFlag['12Vman'] = False
-      canSend(125)
-      time.sleep(0.1)
-      ucFlag['12Vthr'] = False
-      canSend(126)
-      time.sleep(0.1)
-      ucFlag['5V'] = False
-      canSend(127)
+    hbIds = [63, 95 ,125, 126, 127]
+    while systemFlag['Can']:
+      for flag in ucFlags:
+         ucFlags[flag] = False
+      for id in hbIds:
+         canSend(id)
+         time.sleep(0.1)
       time.sleep(1)
-      for item in ucFlag:
-         time.sleep(0.5)
-         if ucFlag[item] == False:
-           netHandler.send(toJson(f"Alarm: uC for {item} not responding to heartbeat"))
+      for flag in ucFlags:
+         if ucFlags[flag] == False:
+           netHandler.send(toJson(f"Alarm: uC for {flag} not responding to heartbeat"))
+           time.sleep(0.1)
+      print(ucFlags)
     print("Heartbeat thread stopped")
 
 class ComHandler:
@@ -248,7 +241,6 @@ class ComHandler:
           raise e
         
   def heartBeat(self):
-    print("Trying to start hb thread")
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
     self.heartBeatThread.start()
 
