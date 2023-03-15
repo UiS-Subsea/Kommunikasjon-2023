@@ -7,16 +7,16 @@ import time
 import threading
 import json
 import os
-import net_handler
+import communicationHandler
+from STTS75_driver import STTS75
 os.chdir(os.path.dirname(os.path.abspath(__file__))) # Bytter working directory til den nåværende slik at programmet kan startes utenfra mappa
 
 # Our main loop for both programs
 def main_loop():
-    #m = Mercury()
-    c = net_handler.ComHandler()
-    while(1):
-        c.readPacket
-        c.sendPacket
+    c = communicationHandler.ComHandler()
+    while True:
+        c.readPacket()
+        c.sendPacket()
 
 if __name__ == "__main__":
     main_loop()

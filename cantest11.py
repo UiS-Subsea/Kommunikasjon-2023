@@ -9,7 +9,7 @@
 """
 
 #todo test if all datatypes is converted correctly
-import can
+from canHandler import Canbus
 import struct
 import time
 import json
@@ -99,6 +99,7 @@ def netThread(netHandler, netCallback, flag):
             if msg == b"" or msg is None:
                 continue
             else:
+                #print(melding)
                 netCallback(msg)
         except ValueError as e:
             print(f'Feilkode i network thread feilmelding: {e}\n\t{msg}')
@@ -106,35 +107,18 @@ def netThread(netHandler, netCallback, flag):
     netHandler.exit()
     print(f'Network thread stopped')
 
-def hbThread(netHandler, canSend, flag):
-   print("Heartbeat thread started")
-   while flag['Can']:
-      canSend(63)
-      time.sleep(0.1)
-      canSend(95)
-      time.sleep(0.1)
-      canSend(127)
-      time.sleep(0.1)
-      canSend(159)
-      time.sleep(2)
-   print("Heartbeat thread stopped")
-
-
-
 
 class ComHandler:
   def __init__(self, 
                ip:str='0.0.0.0',
-               port:int=6900,
-               canifaceType:str='socketcan',
-               canifaceName:str='can0') -> None:
-    self.canifaceType  = canifaceType
-    self.canifaceName  = canifaceName
+               port:int=6900
+               ) -> None:
+
     self.status = {'Net': False, 'Can': False}
     self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
     #activate can in os sudo ip link set can0 type can bitrate 500000 etc.
     #check if can is in ifconfig then
-    self.canInit()
+    self.Can = Canbus()
     self.connectIp = ip
     self.connectPort = port
     self.netInit()
@@ -186,36 +170,22 @@ class ComHandler:
         except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
-  def canInit(self):
-    self.bus = can.Bus(
-      interface             = self.canifaceType,
-      channel               = self.canifaceName,
-      receive_own_messages  = False,
-      fd                    = False)
-    self.bus.set_filters(self.canFilters)
-    self.status['Can'] = True
-    self.notifier = can.Notifier(self.bus, [self.readPacket])
-    self.heartBeat()
-    self.timeout = 0.1 # todo kan denne fjernes?
   
   def sendPacket(self, tag):
     packet = packetBuild(tag)
     assert self.bus is not None
-    try:
+    try:    #self.listner = can.Listener()
       self.bus.send(packet)
     except Exception as e:
       raise e
 
   def readPacket(self, can):
-        self.bus.socket.settimeout(0)
+
         try:
           msg = packetDecode(can)
           self.netHandler.send(msg)
         except Exception as e:
           raise e
-        
-  def heartBeat(self):
-        self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status))
 
 
 if __name__ == "__main__":

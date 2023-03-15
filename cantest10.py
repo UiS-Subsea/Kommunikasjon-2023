@@ -84,9 +84,6 @@ def packetDecode(msg):
     print(f"Polo: {pack}")
     json_dict = {canID: (pack)}
   else:
-    #print(f"Unknown CanID: {canID} recived from ROV system")
-    #return to_json("Unknown CanID:" {canID} "recived from ROV system")
-    #return to_json({"ID unknown", "0" ,"0" ,"0"})
     return f"Unknown CanID: {canID} recived from ROV system"
 
   return to_json(json_dict)
