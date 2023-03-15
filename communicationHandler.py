@@ -74,13 +74,23 @@ def packetBuild(tags):
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
 #decodes packs
-def packetDecode(msg):
+def packetDecode(msg, ucFlag):
   canID = msg.arbitration_id
   dataByte = msg.data
   try:
     if 155 <= canID <= 159:
-       pack = dataByte[0:6].decode('utf-8')
-       jsonDict = {canID: (pack)}
+      pack = dataByte[0:6].decode('utf-8')
+      jsonDict = {canID: (pack)}
+      if canID == 155:
+        ucFlag['Reg'] = True
+      elif canID == 156:
+        ucFlag['Sensor'] = True
+      elif canID == 157:
+        ucFlag['12Vman'] = True
+      elif canID == 158:
+        ucFlag['12Vthr'] = True
+      elif canID == 159:
+        ucFlag['5V'] = True
     elif 1 < canID < 150:
       pack1 = getNum("int16", dataByte[0:2])
       pack2 = getNum("int16", dataByte[2:4])
@@ -119,19 +129,27 @@ def netThread(netHandler, netCallback, flag):
     netHandler.exit()
     print(f'Network thread stopped')
 
-def hbThread(canSend, flag):
+def hbThread(netHandler, canSend, flag, ucFlag):
     print("Heartbeat thread started")
     while flag['Can']:
+      ucFlag['Regulering'] = False
       canSend(63)
       time.sleep(0.1)
+      ucFlag['Sensor'] = False
       canSend(95)
       time.sleep(0.1)
+      ucFlag['12Vman'] = False
       canSend(125)
       time.sleep(0.1)
+      ucFlag['12Vthr'] = False
       canSend(126)
       time.sleep(0.1)
+      ucFlag['5V'] = False
       canSend(127)
-      time.sleep(2)
+      time.sleep(1)
+      for item in ucFlag:
+         if ucFlag[item] == False:
+           netHandler.send(toJson(f"Alarm:{ucFlag[item]} not active"))
     print("Heartbeat thread stopped")
 
 class ComHandler:
@@ -143,6 +161,7 @@ class ComHandler:
     self.canifaceType  = canifaceType
     self.canifaceName  = canifaceName
     self.status = {'Net': False, 'Can': False}
+    self.uCstatus = {'Reg': False, 'Sensor': False, '12Vman': False, '12Vthr': False, '5V': False}
     #self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
     self.canFilters = [{"can_id" : 0x00 , "can_mask" : 0x00, "extended" : False }]
     #activate can in os sudo ip link set can0 type can bitrate 500000 etc.
@@ -187,8 +206,7 @@ class ComHandler:
                                    {'int16', int(item[1])},
                                    {'int16', int(item[2])},
                                    {'int16', int(item[3])},
-                                   {'int16', int(item[4])}
-                                   }
+                                   {'int16', int(item[4])}}
                                 self.sendPacket(msg)
                             elif item[0] == 64:
                                 msg = {item[0],
@@ -223,14 +241,14 @@ class ComHandler:
   def readPacket(self, can):
         self.bus.socket.settimeout(0)
         try:
-          msg = packetDecode(can)
+          msg = packetDecode(can, self.uCstatus)
           self.netHandler.send(msg)
         except Exception as e:
           raise e
         
   def heartBeat(self):
     print("Trying to start hb thread")
-    self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.sendPacket, self.status))
+    self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
     self.heartBeatThread.start()
 
 
