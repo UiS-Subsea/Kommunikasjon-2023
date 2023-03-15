@@ -142,7 +142,7 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
       for flag in ucFlags:
         if not ucFlags[flag]:
           print(f"in hb if {ucFlags[flag]}")
-          msg = toJson({"Alarm": f" uC {flag} not responding to heartbeat"}))
+          msg = toJson({"Alarm": f" uC {flag} not responding to heartbeat"})
           print(msg)
           netHandler.send(msg)
           print("hb alarm sent")
