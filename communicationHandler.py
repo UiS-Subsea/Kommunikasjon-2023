@@ -117,21 +117,16 @@ def netThread(netHandler, netCallback, flag):
 
 def hbThread(canSend, flag):
     print("Heartbeat thread started")
-    tag0 = {63, {'marco/n'}}
-    tag1 = {95, {'marco/n'}}
-    tag2 = {125, {'marco/n'}}
-    tag3 = {126, {'marco/n'}}
-    tag4 = {127, {'marco/n'}}
     while flag['Can']:
-      canSend(tag0)
+      canSend('hb63')
       time.sleep(0.1)
-      canSend(tag1)
+      canSend('hb95')
       time.sleep(0.1)
-      canSend(tag2)
+      canSend('hb125')
       time.sleep(0.1)
-      canSend(tag3)
+      canSend('hb126')
       time.sleep(0.1)
-      canSend(tag4)
+      canSend('hb127')
       time.sleep(2)
     print("Heartbeat thread stopped")
 
