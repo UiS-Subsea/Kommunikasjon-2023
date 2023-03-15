@@ -15,8 +15,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__))) # Bytter working directory 
 def main_loop():
     c = communicationHandler.ComHandler()
     while True:
-        c.readPacket()
-        c.sendPacket()
+        time.sleep(1)
 
 if __name__ == "__main__":
     main_loop()
