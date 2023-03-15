@@ -116,8 +116,8 @@ def netThread(netHandler, netCallback, flag):
     print(f'Network thread stopped')
 
 def hbThread(canSend, flag):
-   print("Heartbeat thread started")
-   while flag['Can']:
+    print("Heartbeat thread started")
+    while flag['Can']:
       canSend(63)
       time.sleep(0.1)
       canSend(95)
@@ -126,7 +126,7 @@ def hbThread(canSend, flag):
       time.sleep(0.1)
       canSend(159)
       time.sleep(2)
-   print("Heartbeat thread stopped")
+    print("Heartbeat thread stopped")
 
 
 class ComHandler:
@@ -205,6 +205,7 @@ class ComHandler:
     self.status['Can'] = True
     self.notifier = can.Notifier(self.bus, [self.readPacket])
     self.timeout = 0.1 # todo kan denne fjernes?
+
   
   def sendPacket(self, tag):
     packet = packetBuild(tag)
@@ -225,6 +226,7 @@ class ComHandler:
   def heartBeat(self):
     print("Trying to start hb thread")
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.sendPacket, self.status))
+    self.heartBeatThread.start()
 
 
 if __name__ == "__main__":
