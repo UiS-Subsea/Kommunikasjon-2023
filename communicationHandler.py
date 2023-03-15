@@ -57,16 +57,19 @@ def packetBuild(tags):
     canID = tags
     msg = bytearray('marco/n', 'utf-8')
   else:
-    canID, *idData = tags
-    idDataByte = []
-    for data in idData:
-      try:
-        idDataByte += struct.pack(can_types[data[0]], *data[1:])
-      except struct.error as e:
-        print(f"Error: {e}")
-        print(f"data={data}, format={data[0]}, value={data[1:]}")
-        print(f"idDataByte={idDataByte}")
-      msg = idDataByte
+    try:
+      canID, *idData = tags
+      idDataByte = []
+      for data in idData:
+        try:
+          idDataByte += struct.pack(can_types[data[0]], *data[1:])
+        except struct.error as e:
+          print(f"Error: {e}")
+          print(f"data={data}, format={data[0]}, value={data[1:]}")
+          print(f"idDataByte={idDataByte}")
+        msg = idDataByte
+    except ValueError as error:
+       return f"Error in building can message: {tags} "
     print(msg)
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
 
