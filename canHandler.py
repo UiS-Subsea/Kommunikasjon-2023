@@ -7,7 +7,6 @@
     @date   13.03.23 
     @author Thomas Matre
 """
-
 import can
 
 #class for esatblishing canbus interface, sending and reciving messages
@@ -52,8 +51,7 @@ class Canbus:
         self.bus.socket.settimeout(0)
         try:
           msg = packetDecode(can)
-          self.netHandler.send(msg)
-          
+          return msg
         except Exception as e:
           raise e
 
