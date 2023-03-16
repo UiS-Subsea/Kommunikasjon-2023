@@ -1,54 +1,52 @@
 #!/usr/bin/python3
 
 """
-    @file   commmunicationHandler.py
+    @file   camPWMr.py
     
-    @brief  
+    @brief  Driver for adafruit servomotor
     @date   10.03.23 
     @author Thomas Matre
 """
 
 import RPi.GPIO as GPIO
-import time
 
-output_pins = {'JETSON_NANO': 33}
-output_pin = output_pins.get(GPIO.model, None)
-if output_pin is None:
-    raise Exception('PWM not supported on this board')
+def scale2x(X0, X1, Y0, Y1, inValue):
+    xRange = X1-X0
+    yRange = Y1-Y0
+    if xRange != 0:
+        Value = (yRange / xRange) * (inValue - X0) + Y0
+    else:
+        Value = 0
+    return Value
 
+class adafruitServoPWM:
+    def __init__(self, pin=32, freq:float=50, startDT:float=7.5) -> None:
+        self.usrpin = pin
+        self.freq = freq
+        self.startDT = startDT
+        if (pin != 32) or (pin != 33):
+            self.pinPwm = {'JETSON_NANO': 32}
+        else:
+            self.pinPwm = {'JETSON_NANO': self.usrpin}
+        self.outputPwm = self.pinPwm.get(GPIO.model, None)
+        self.initPWM()
 
-def main():
-    # Pin Setup:
-    # Board pin-numbering scheme
-    GPIO.setmode(GPIO.BOARD)
-    # set pin as an output pin with optional initial state of HIGH
-    GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.HIGH)
-    p = GPIO.PWM(output_pin, 50)
-    val = 25
-    incr = 5
-    p.start(val)
-
-    print("PWM running. Press CTRL+C to exit.")
-    try:
-        while True:
-            time.sleep(0.25)
-            if val >= 100:
-                incr = -incr
-            if val <= 0:
-                incr = -incr
-            val += incr
-            p.ChangeDutyCycle(val)
-    finally:
-        p.stop()
-        GPIO.cleanup()
-
-class jetsonPWM:
-    def __init__(self) -> None:
-        
-
-
-        self.output = GPIO.PWM()
-
+    def initPWM(self):
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(self.outputPwm, GPIO.OUT, initial=GPIO.HIGH)
+        self.PWM = GPIO.PWM(self.outputPwm, self.freq)
+        self.PWM.start(self.startDT)
+    
+    def newAngle(self, angle):
+        try: 
+            if 0 <= angle <= 180:
+                value = scale2x(0, 180, 5, 10, angle)
+            else:
+                value = 7.5
+            self.PWM.ChangeDutyCycle(value)
+        finally:
+            self.PWM.stop()
+            GPIO.cleanup()
 
 if __name__ == '__main__':
-    main()
+    pwm = adafruitServoPWM()
