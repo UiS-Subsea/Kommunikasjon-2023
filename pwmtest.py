@@ -36,10 +36,10 @@ def main():
         while True:
             time.sleep(1)
             if val >= 10:
-                incr = -incr
+                step = -incr
             if val <= 5:
-                incr = -incr
-            val += incr
+                step = incr
+            val += step
             p.ChangeDutyCycle(val)
             print(val)
     finally:
