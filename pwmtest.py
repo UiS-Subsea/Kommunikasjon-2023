@@ -41,6 +41,8 @@ def main():
                 val = 7.5
             elif do == "c":
                 val = 10
+            elif do == "kill":
+                GPIO.output(output_pinOE, False)
             else:
                 val = 7.5
             p.ChangeDutyCycle(val)
