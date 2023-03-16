@@ -25,7 +25,7 @@ def main():
     # set pin as an output pin with optional initial state of HIGH
     GPIO.setup(output_pinpwm, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(output_pinOE, GPIO.OUT, initial=GPIO.HIGH)
-    p = GPIO.PWM.Servo(output_pinpwm, 1)
+    p = GPIO.PWM(output_pinpwm, 50)
     GPIO.output(output_pinOE, False)
     val = 5
     incr = 0.2
