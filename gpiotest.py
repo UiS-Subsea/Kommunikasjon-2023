@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 # Pin Definitions
-output_pins = 36  # BCM pin 18, BOARD pin 12
+output_pins = {'JETSON_NANO': 32}
 output_pin = output_pins.get(GPIO.model, None)
 
 def main():
