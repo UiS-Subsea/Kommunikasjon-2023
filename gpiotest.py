@@ -2,7 +2,7 @@ import RPi.GPIO as GPIO
 import time
 
 # Pin Definitions
-output_pins = {'JETSON_NANO': 32}
+output_pins = {'JETSON_NANO': 36}
 output_pin = output_pins.get(GPIO.model, None)
 
 def main():
