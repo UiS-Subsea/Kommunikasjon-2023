@@ -26,7 +26,7 @@ def main():
     GPIO.setup(output_pinpwm, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(output_pinOE, GPIO.OUT, initial=GPIO.HIGH)
     p = GPIO.PWM(output_pinpwm, 50)
-    o = GPIO.output(output_pinOE, True)
+    o = GPIO.output(output_pinOE, False)
     val = 25
     incr = 25
     p.start(val)
@@ -45,7 +45,6 @@ def main():
             print(val)
     finally:
         p.stop()
-        o.stop()
         GPIO.cleanup()
 if __name__ == "__main__":
     main()
