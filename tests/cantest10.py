@@ -7,7 +7,7 @@ import threading
 import sys
 import os
 import subprocess
-from network_handler import Network
+from drivers.network_handler import Network
 
 
 can_types = {

@@ -19,14 +19,6 @@ import os
 import subprocess
 from drivers.network_handler import Network
 from drivers.STTS75_driver import STTS75
-from drivers.camPWM import adafruitServoPWM
-from functions.fFormating import getBit
-from functions.fFormating import getByte
-from functions.fFormating import getNum
-from functions.fFormating import setBit
-from functions.fFormating import toJson
-from functions.fPacketBuild import packetBuild
-from functions.fPacketDecode import packetDecode
 
 
 can_types = {
@@ -40,6 +32,116 @@ can_types = {
     "uint64": "<Q",
     "float": "<f"
 }
+
+
+def getByte(can_format:str, number):
+    return list(struct.pack(can_types[can_format], number))
+
+def getNum(can_format:str, byt):
+    if isinstance(byt, int):
+        byt = byt.to_bytes(1, byteorder="big")
+    return struct.unpack(can_types[can_format], byt)[0]
+
+def getBit(num, bit_nr):
+    return (num >> bit_nr) & 1
+
+def setBit(bits: tuple):
+    return sum(bit << k for k, bit in enumerate(bits))
+#formats to json format in agreed upon formating
+def toJson(input):
+    packet_sep = json.dumps("*")
+    return bytes(packet_sep + json.dumps(input) + packet_sep, "utf-8")
+
+#builds packs for canbus
+def packetBuild(tags):
+  if tags in [63, 95, 125, 126, 127]: 
+    canID = tags
+    msg = bytearray('marco/n', 'utf-8')
+  else:
+    try:
+      canID, *idData = tags
+      idDataByte = []
+      for data in idData:
+        try:
+          idDataByte += struct.pack(can_types[data[0]], *data[1:])
+        except struct.error as e:
+          print(f"Error: {e}")
+          print(f"data={data}, format={data[0]}, value={data[1:]}")
+          print(f"idDataByte={idDataByte}")
+        msg = idDataByte
+    except ValueError as error:
+       return f"Error in building can message: {tags} "
+    print(msg)
+  return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)
+
+#decodes packs
+def packetDecode(msg, ucFlags):
+  canID = msg.arbitration_id
+  dataByte = msg.data
+  hbIds     = [155, 156, 157, 158, 159]
+  int8Ids   = [1,2,3,4,5,6,7,8]
+  uint8Ids  = [9,10,11]
+  int16Ids  = [50,51,52]
+  uint16Ids = [12,13,14,15]
+
+  try:
+    if canID in hbIds:
+      pack = dataByte[0:6].decode('utf-8')
+      jsonDict = {canID: (pack)}
+      if canID == 155:
+        ucFlags['Reg'] = True
+      elif canID == 156:
+        ucFlags['Sensor'] = True
+      elif canID == 157:
+        ucFlags['12Vman'] = True
+      elif canID == 158:
+        ucFlags['12Vthr'] = True
+      elif canID == 159:
+        ucFlags['5V'] = True
+    elif canID in int16Ids:
+      pack1 = getNum("int16", dataByte[0:2])
+      pack2 = getNum("int16", dataByte[2:4])
+      pack3 = getNum("int16", dataByte[4:6])
+      pack4 = getNum("int16", dataByte[6:8])
+      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
+    elif canID in uint16Ids:
+      pack1 = getNum("uint16", dataByte[0:2])
+      pack2 = getNum("uint16", dataByte[2:4])
+      pack3 = getNum("uint16", dataByte[4:6])
+      pack4 = getNum("uint16", dataByte[6:8])
+      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
+    elif canID in int8Ids:
+      pack1 = getNum("int8", dataByte[0])
+      pack2 = getNum("int8", dataByte[1])
+      pack3 = getNum("int8", dataByte[2])
+      pack4 = getNum("int8", dataByte[3])
+      pack5 = getNum("int8", dataByte[4])
+      pack6 = getNum("int8", dataByte[5])
+      pack7 = getNum("int8", dataByte[6])
+      pack8 = getNum("int8", dataByte[7])
+      jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
+    elif canID in uint8Ids:
+      pack1 = getNum("uint8", dataByte[0])
+      pack2 = getNum("uint8", dataByte[1])
+      pack3 = getNum("uint8", dataByte[2])
+      pack4 = getNum("uint8", dataByte[3])
+      pack5 = getNum("uint8", dataByte[4])
+      pack6 = getNum("uint8", dataByte[5])
+      pack7 = getNum("uint8", dataByte[6])
+      pack8 = getNum("uint8", dataByte[7])
+      jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
+    elif canID == 52:
+      pack1 = getNum("int32", dataByte[0:4])
+      pack2 = getNum("int8",  dataByte[4])
+      pack3 = getNum("uint8", dataByte[5])
+      pack4 = getNum("uint16", dataByte[6:8])
+      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
+    else:
+      print(f"Unknown CanID: {canID} recived from ROV system")
+      jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
+  except TypeError as e:
+     jsonDict = {"Error": e}
+  return toJson(jsonDict)
 
 
 # Reads data from network port

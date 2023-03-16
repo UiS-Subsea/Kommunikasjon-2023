@@ -4,7 +4,7 @@
     @file   camPWMr.py
     
     @brief  Driver for adafruit servomotor
-    @date   10.03.23 
+    @date   16.03.23 
     @author Thomas Matre
 """
 
