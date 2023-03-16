@@ -27,7 +27,7 @@ def main():
     GPIO.setup(output_pinOE, GPIO.OUT, initial=GPIO.HIGH)
     p = GPIO.PWM(output_pinpwm, 50)
     GPIO.output(output_pinOE, False)
-    val = 5
+    val = 25
     incr = 0.2
     p.start(val)
 
@@ -38,7 +38,7 @@ def main():
             if val >= 10:
                 incr = -incr
             if val <= 5:
-                incr = -incr
+                incr = incr
             val += incr
             p.ChangeDutyCycle(val)
             print(val)
