@@ -182,7 +182,7 @@ def i2cThread(netHandler, STTS75, systemFlag):
     print("i2c Thread started")
     while systemFlag['Net']:
        temp = STTS75.read_temp()
-       msg = toJson{"Temp on Jetson": temp}
+       msg = toJson({"Temp on Jetson": temp})
        netHandler.send(msg)
        time.sleep(2)
     print("i2c Thread stopped")
