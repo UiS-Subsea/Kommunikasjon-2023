@@ -38,6 +38,9 @@ def main():
                 incr = -incr
             val += incr
             p.ChangeDutyCycle(val)
+            print(val)
     finally:
         p.stop()
         GPIO.cleanup()
+if __name__ == "__main__":
+    main()
