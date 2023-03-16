@@ -38,7 +38,7 @@ def main():
             if val >= 10:
                 incr = -incr
             if val <= 5:
-                incr = incr
+                incr = -incr
             val += incr
             p.ChangeDutyCycle(val)
             print(val)
