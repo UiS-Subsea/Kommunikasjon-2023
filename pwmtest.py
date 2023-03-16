@@ -11,9 +11,11 @@
 import RPi.GPIO as GPIO
 import time
 
-output_pins = {'JETSON_NANO': 32}
-output_pin = output_pins.get(GPIO.model, None)
-if output_pin is None:
+output_pinspwm = {'JETSON_NANO': 32}
+output_pinpwm = output_pinspwm.get(GPIO.model, None)
+output_pinsOE = {'JETSON_NANO': 36}
+output_pinOE = output_pinsOE.get(GPIO.model, None)
+if output_pinpwm is None or output_pinOE is None:
     raise Exception('PWM not supported on this board')
 
 def main():
@@ -21,8 +23,10 @@ def main():
     # Board pin-numbering scheme
     GPIO.setmode(GPIO.BOARD)
     # set pin as an output pin with optional initial state of HIGH
-    GPIO.setup(output_pin, GPIO.OUT, initial=GPIO.HIGH)
-    p = GPIO.PWM(output_pin, 50)
+    GPIO.setup(output_pinpwm, GPIO.OUT, initial=GPIO.HIGH)
+    GPIO.setup(output_pinOE, GPIO.OUT, initial=GPIO.HIGH)
+    p = GPIO.PWM(output_pinpwm, 50)
+    GPIO.output(output_pinOE, True)
     val = 25
     incr = 5
     p.start(val)
