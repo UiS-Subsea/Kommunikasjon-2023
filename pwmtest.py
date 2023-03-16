@@ -34,12 +34,15 @@ def main():
     print("PWM running. Press CTRL+C to exit.")
     try:
         while True:
-            time.sleep(1)
-            if val >= 10:
-                step = -incr
-            if val <= 5:
-                step = incr
-            val += step
+            do = input("dutycycle?")
+            if do == "a":
+                val = 5
+            elif do == "b":
+                val = 7.5
+            elif do == "c":
+                val = 10
+            else:
+                val = 7.5
             p.ChangeDutyCycle(val)
             print(val)
     finally:
