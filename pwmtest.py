@@ -11,7 +11,7 @@
 import RPi.GPIO as GPIO
 import time
 
-output_pinspwm = {'JETSON_NANO': 32}
+output_pinspwm = {'JETSON_NANO': 33}
 output_pinpwm = output_pinspwm.get(GPIO.model, None)
 output_pinsOE = {'JETSON_NANO': 36}
 output_pinOE = output_pinsOE.get(GPIO.model, None)
@@ -25,20 +25,19 @@ def main():
     # set pin as an output pin with optional initial state of HIGH
     GPIO.setup(output_pinpwm, GPIO.OUT, initial=GPIO.HIGH)
     GPIO.setup(output_pinOE, GPIO.OUT, initial=GPIO.HIGH)
-    p = GPIO.PWM(output_pinpwm, 50)
-    o = GPIO.output(output_pinOE, False)
-    val = 25
-    incr = 25
+    p = GPIO.PWM.Servo(output_pinpwm, 1)
+    GPIO.output(output_pinOE, False)
+    val = 5
+    incr = 0.2
     p.start(val)
-    
 
     print("PWM running. Press CTRL+C to exit.")
     try:
         while True:
-            time.sleep(3)
-            if val >= 100:
+            time.sleep(1)
+            if val >= 10:
                 incr = -incr
-            if val <= 0:
+            if val <= 5:
                 incr = -incr
             val += incr
             p.ChangeDutyCycle(val)
