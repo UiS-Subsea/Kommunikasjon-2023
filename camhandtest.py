@@ -11,17 +11,17 @@ class gstreamerPipe(Thread):
         self.multicastGroup = multicastGroup
         self.bitrate = bitrate
         if self.pipeId == "stereo1":
-            self.port = "5000"
-            self.sourceID = "0"
+            self.port = '5000'
+            self.sourceID = '0'
         elif self.pipeId == "stereo2":
-            self.port = "5001"
-            self.sourceID = "1"
+            self.port = '5001'
+            self.sourceID = '1'
         elif self.pipeId == "bottom":
-            self.port = "5002"
-            self.sourceID = "2"
+            self.port = '5002'
+            self.sourceID = '2'
         elif self.pipeId == "manipulator":
-            self.port = "5003"
-            self.sourceID = "3"
+            self.port = '5003'
+            self.sourceID = '3'
         else:
             self.port = port
         self.pipe = self.createPipe()
