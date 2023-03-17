@@ -9,6 +9,7 @@
 """
 import can
 import struct
+import json
 
 can_types = {
     "int8": "<b",
