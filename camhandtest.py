@@ -53,7 +53,6 @@ class gstreamerPipe(Thread):
         pipeline = self.createPipe()
         thread = Thread(target=self.mainLoop.run)
         thread.start()
-        self.runPipe()
         try:
             while True:
                 time.sleep(0.1)
