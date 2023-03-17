@@ -29,7 +29,7 @@ class gstreamerPipe(Thread):
     def createPipe(self):
         if self.pipeId == "stereo1" or self.pipeId == "stereo2":
             #gstStr = (f"nvarguscamerasrc sensor-id={self.sourceID} ! 'video/x-raw(memory:NVMM), width=1920, heigth=1080, framerate=30/1, format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate={self.bitrate} ! rtph264pay ! udpsink host={self.multicastGroup} port={self.port} auto-multicast=true")
-            gstStr = (f"videotestsrc ! 'video/x-raw(memory:NVMM), width=1920, heigth=1080, framerate=30/1, format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate={self.bitrate} ! rtph264pay ! udpsink host={self.multicastGroup} port={self.port} auto-multicast=true")
+            gstStr = (f"videotestsrc ! nvv4l2h264enc insert-sps-pps=true bitrate={self.bitrate} ! rtph264pay ! udpsink host={self.multicastGroup} port={self.port} auto-multicast=true")
 
         elif self.pipeId == "bottom" or self.pipeId == "manipulator":
             gstStr = (f"v4l2src device=/dev/video{self.sourceID} io-mode=2 ! 'image/jpeg, format=MJPG, width=1920, heigth=1080, framerate=30/1' ! nvjpegdec ! 'video/x-raw' ! nvvidconv ! 'video/x-raw(memory:NVMM), format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate={self.bitrate} ! rtph264pay ! udpsink host={self.multicastGroup} port={self.port} auto-multicast=true")
