@@ -20,7 +20,7 @@ def scale2x(X0, X1, Y0, Y1, inValue):
     return Value
 
 class adafruitServoPWM:
-    def __init__(self, pin=32, freq:float=50, startDT:float=7.5) -> None:
+    def __init__(self, pin=32, freq=50, startDT:float=7.5) -> None:
         self.usrpin = pin
         self.freq = freq
         self.startDT = startDT
@@ -49,7 +49,11 @@ class adafruitServoPWM:
         GPIO.cleanup()
 
 if __name__ == '__main__':
-    pwm = adafruitServoPWM()
-    while True:
-        a = float(input("angle: "))
-        pwm.newAngle(a)
+    pin = int(input("pin"))
+    pwm = adafruitServoPWM(pin=32,freq=50)
+    try:
+        while True:
+            a = float(input("angle: "))
+            pwm.newAngle(a)
+    finally:
+        pwm.cleanup()
