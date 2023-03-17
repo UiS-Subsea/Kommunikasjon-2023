@@ -2,6 +2,8 @@ from threading import Thread
 import gi
 import time
 
+
+#teststring gst-launch-1.0 videotestsrc ! videoconvert ! autovideosink
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
