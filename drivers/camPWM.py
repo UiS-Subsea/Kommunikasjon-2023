@@ -43,6 +43,7 @@ class adafruitServoPWM:
         else:
             value = 7.5
         self.PWM.ChangeDutyCycle(value)
+        print(value)
     def cleanup(self):
         self.PWM.stop()
         GPIO.cleanup()
