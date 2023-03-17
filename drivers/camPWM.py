@@ -52,4 +52,4 @@ if __name__ == '__main__':
     pwm = adafruitServoPWM()
     while True:
         a = float(input("angle: "))
-        adafruitServoPWM.newAngle(a)
+        pwm.newAngle(a)
