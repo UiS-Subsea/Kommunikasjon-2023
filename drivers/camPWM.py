@@ -38,15 +38,14 @@ class adafruitServoPWM:
         self.PWM.start(self.startDT)
     
     def newAngle(self, angle):
-        try: 
-            if 0 <= angle <= 180:
-                value = scale2x(X0=0, X1=180, Y0=5, Y1=10, inValue=angle)
-            else:
-                value = 7.5
-            self.PWM.ChangeDutyCycle(value)
-        finally:
-            self.PWM.stop()
-            GPIO.cleanup()
+        if 0 <= angle <= 180:
+            value = scale2x(X0=0, X1=180, Y0=5, Y1=10, inValue=angle)
+        else:
+            value = 7.5
+        self.PWM.ChangeDutyCycle(value)
+    def cleanup(self):
+        self.PWM.stop()
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     pwm = adafruitServoPWM()
