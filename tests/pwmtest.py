@@ -11,7 +11,7 @@
 import RPi.GPIO as GPIO
 import time
 
-output_pinspwm = {'JETSON_NANO': 32}
+output_pinspwm = {'JETSON_NANO': 33}
 output_pinpwm = output_pinspwm.get(GPIO.model, None)
 output_pinsOE = {'JETSON_NANO': 36}
 output_pinOE = output_pinsOE.get(GPIO.model, None)
