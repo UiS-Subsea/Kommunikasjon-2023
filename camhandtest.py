@@ -67,8 +67,8 @@ if __name__ == "__main__":
     Gst.init([])
     stereo1_pipe = gstreamerPipe(pipeId="stereo1", port="5000")
     stereo2_pipe = gstreamerPipe(pipeId="stereo2", port="5001")
-    bottom_pipe = gstreamerPipe(pipeId="test", port="5002")
-    manipulator_pipe = gstreamerPipe(pipeId="test", port="5003")
+    bottom_pipe = gstreamerPipe(pipeId="test", port="5000")
+    manipulator_pipe = gstreamerPipe(pipeId="test", port="5001")
     test_pipe = gstreamerPipe(pipeId="test", port="5004")
     
     # Start the pipes in separate threads
