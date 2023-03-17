@@ -21,3 +21,5 @@ gst-launch-1.0 v4l2src device=/dev/video1 io-mode=2 ! 'image/jpeg, format=MJPG, 
 #multicast server
 route add -net 224.0.0.0 netmask 224.0.0.0 eth0
 gst-launch-1.0 nvarguscamerasrc sensor-id=0 ! 'video/x-raw(memory:NVMM), width=1920, heigth=1080, framerate=30/1, format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate=16000000 ! rtph264pay ! udpsink host=224.1.1.1 port=5000 auto-multicast=true
+
+"udpsrc multicast-group=224.1.1.1 auto-multicast=true port=5000 ! application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, payload=96 ! rtph264depay ! h264parse ! decodebin ! videoconvert ! autovideosink sync=false")
