@@ -16,7 +16,7 @@ gst-launch-1.0 nvarguscamerasrc sensor-id=0 ! 'video/x-raw(memory:NVMM), width=1
 gst-launch-1.0 v4l2src device=/dev/video2 ! 'video/x-raw, width=640, heigth=480, framerate=30/1, format=YUY2' ! nvvidconv ! 'video/x-raw(memory:NVMM), format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate=16000000 ! rtph264pay ! udpsink host=10.0.0.186 port=5002
 
 #mjpeg stream
-gst-launch-1.0 v4l2src device=/dev/video1 io-mode=2 ! 'image/jpeg, format=MJPG, width=2560, heigth=960, framerate=30/1' ! nvjpegdec ! 'video/x-raw' ! nvvidconv ! 'video/x-raw(memory:NVMM), format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate=16000000 ! rtph264pay ! udpsink host=224.1.1.1 port=5000 auto-multicast=true
+gst-launch-1.0 v4l2src device=/dev/video1 io-mode=2 ! 'image/jpeg, format=MJPG, width=1280, heigth=720, framerate=30/1' ! nvjpegdec ! 'video/x-raw' ! nvvidconv ! 'video/x-raw(memory:NVMM), format=NV12' ! nvv4l2h264enc insert-sps-pps=true bitrate=16000000 ! rtph264pay ! udpsink host=224.1.1.1 port=5000 auto-multicast=true
 
 #multicast server
 route add -net 224.0.0.0 netmask 224.0.0.0 eth0

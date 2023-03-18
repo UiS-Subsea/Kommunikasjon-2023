@@ -17,9 +17,11 @@ import threading
 import sys
 import os
 import subprocess
+import gi
 from drivers.network_handler import Network
 from drivers.STTS75_driver import STTS75
 from drivers.camPWM import adafruitServoPWM
+from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit
 from functions.fFormating import getByte
 from functions.fFormating import getNum
@@ -27,6 +29,8 @@ from functions.fFormating import setBit
 from functions.fFormating import toJson
 from functions.fPacketBuild import packetBuild
 from functions.fPacketDecode import packetDecode
+gi.require_version("Gst", "1.0")
+from gi.repository import Gst, GLib
 
 
 can_types = {
@@ -95,6 +99,7 @@ class ComHandler:
     self.canifaceName  = canifaceName
     self.status = {'Net': False, 'Can': False}
     self.uCstatus = {'Reg': False, 'Sensor': False, '12Vman': False, '12Vthr': False, '5V': False}
+    self.camStatus = {'Threads': False, 'S1': False, 'S2': False, 'Bottom': False, 'Manipulator': False}
     #self.canFilters = [{"can_id" : 0x60 , "can_mask" : 0xF8, "extended" : False }]
     self.canFilters = [{"can_id" : 0x00 , "can_mask" : 0x00, "extended" : False }]
     #activate can in os sudo ip link set can0 type can bitrate 500000 etc.
@@ -105,6 +110,7 @@ class ComHandler:
     self.netInit()
     self.heartBeat()
     self.i2cInit()
+    self.camInit()
 
   def netInit(self):
     self.netHandler = Network(is_server=True, 
@@ -189,6 +195,52 @@ class ComHandler:
      self.i2cThread = threading.Thread(name="i2cThread" ,target=i2cThread,daemon=True, args=(self.netHandler, self.STTS75, self.status))
      self.i2cThread.start()
 
+  def camInit(self):
+     Gst.init([])
+     self.stereo1Pipe = gstreamerPipe(pipeId="stereo1", port="5000")
+     self.stereo1Thread = threading.Thread(target=self.stereo1Pipe.run)
+     self.stereo1Thread.start()
+     self.stereo2Pipe = gstreamerPipe(pipeId="stereo2", port="5001")
+     self.stereo2Thread = threading.Thread(target=self.stereo2Pipe.run)
+     self.stereo2Thread.start()
+     self.bottomPipe = gstreamerPipe(pipeId="bottom", port="5002")
+     self.bottomThread = threading.Thread(target=self.bottomPipe.run)
+     self.bottomThread.start()
+     self.manipulatorPipe = gstreamerPipe(pipeId="manipulator", port="5003")
+     self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
+     self.manipulatorThread.start()
+     self.camStatus['Threads'] = True
+
+  def camStart(self, pipeId):
+     if pipeId == 'stereo1':
+        self.stereo1Pipe.runPipe()
+        self.camStatus['S1'] = True
+     elif pipeId == 'stereo2':
+        self.stereo2Pipe.runPipe()
+        self.camStatus['S2'] = True
+     elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running
+        self.bottomPipe.runPipe()
+        self.camStatus['bottom'] = True
+     elif pipeId == 'manipulator' and self.camStatus['S1'] or self.camStatus['S2']:
+        self.manipulatorPipe.runPipe()
+        self.camStatus['manipulator'] = True
+     self.netHandler.send(toJson(f"Camera: {pipeId} started"))
+     
+  def camStop(self, pipeId):
+     if pipeId == 'stereo1':
+        self.stereo1Pipe.stopPipe()
+        self.camStatus['S1'] = False
+     elif pipeId == 'stereo2':
+        self.stereo2Pipe.stopPipe()
+        self.camStatus['S2'] = False
+     elif pipeId == 'bottom':
+        self.bottomPipe.stopPipe()
+        self.camStatus['bottom'] = False
+     elif pipeId == 'manipulator':
+        self.manipulatorPipe.stopPipe()
+        self.camStatus['manipulator'] = False
+     self.netHandler.send(toJson(f"Camera: {pipeId} stopped"))
+     
 
 if __name__ == "__main__":
 # tag = (type, value)
