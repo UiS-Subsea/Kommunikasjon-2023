@@ -33,12 +33,20 @@ def run_camera_stream(multicast_group, port):
 
 camera1_info = ("224.1.1.1", 5000)
 camera2_info = ("224.1.1.1", 5001)
+camera3_info = ("224.1.1.1", 5002)
+camera4_info = ("224.1.1.1", 5003)
 
 thread1 = Thread(target=run_camera_stream, args=camera1_info)
 thread2 = Thread(target=run_camera_stream, args=camera2_info)
+thread3 = Thread(target=run_camera_stream, args=camera3_info)
+thread4 = Thread(target=run_camera_stream, args=camera4_info)
 
 thread1.start()
 thread2.start()
+thread3.start()
+thread4.start()
 
 thread1.join()
 thread2.join()
+thread3.join()
+thread4.join()
