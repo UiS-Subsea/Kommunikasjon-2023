@@ -153,6 +153,30 @@ class ComHandler:
                                    {'int16', int(item[1])}, {'int16', int(item[2])}, {'int16', int(item[3])}, {'int16', int(item[4])}
                                    }
                                 self.sendPacket(msg)
+                            else: 
+                               self.netHandler.send(toJson('Error: Unknow can id'))
+                    elif item[0] == 200:
+                        if item[1] == 'tilt':
+                          if item[2] == 1:
+                            if not self.camStatus['S1']:
+                                self.camStart('stereo1')
+                            elif self.camStatus['S1']:
+                                self.camStop('stereo1')
+                          elif item[2] == 2:
+                            if not self.camStatus['S2']:
+                                self.camStart('stereo2')
+                            elif self.camStatus['S2']:
+                                self.camStop('stereo2')
+                          elif item[2] == 3:
+                            if not self.camStatus['Bottom']:
+                                self.camStart('bottom')
+                            elif self.camStatus['Bottom']:
+                                self.camStop('bottom')                        
+                          elif item[2] == 4:
+                            if not self.camStatus['Manipulator']:
+                                self.camStart('manipulator')
+                            elif self.camStatus['Manupulator']:
+                                self.camStop('manipulator')                                
                         else:
                             self.netHandler.send(toJson("Error: Canbus not initialised"))
         except Exception as e:
