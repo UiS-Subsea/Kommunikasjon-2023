@@ -9,26 +9,11 @@
 """
 
 #todo test if all datatypes is converted correctly
-import can
-import struct
-import time
-import json
-import threading
-import sys
-import os
-import subprocess
-import gi
-from drivers.network_handler import Network
-from drivers.STTS75_driver import STTS75
-from drivers.camPWM import adafruitServoPWM
-from drivers.camHandler import gstreamerPipe
-from functions.fFormating import getBit
-from functions.fFormating import getByte
-from functions.fFormating import getNum
-from functions.fFormating import setBit
-from functions.fFormating import toJson
-from functions.fPacketBuild import packetBuild
-from functions.fPacketDecode import packetDecode
+import can import struct import time import json import threading import sys import os import subprocess
+from drivers.network_handler import Network from drivers.STTS75_driver import STTS75 from drivers.camPWM import adafruitServoPWM from drivers.camHandler import gstreamerPipe
+from functions.fFormating import getBit from functions.fFormating import getByte from functions.fFormating import getNumfrom functions.fFormating import setBit from functions.fFormating import toJson
+from functions.fPacketBuild import packetBuild from functions.fPacketDecode import packetDecode
+import gi 
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
@@ -242,10 +227,10 @@ class ComHandler:
      elif pipeId == 'stereo2':
         self.stereo2Pipe.runPipe()
         self.camStatus['S2'] = True
-     elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running
+     elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
         self.bottomPipe.runPipe()
         self.camStatus['bottom'] = True
-     elif pipeId == 'manipulator' and self.camStatus['S1'] or self.camStatus['S2']:
+     elif pipeId == 'manipulator' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
         self.manipulatorPipe.runPipe()
         self.camStatus['manipulator'] = True
      self.netHandler.send(toJson(f"Camera: {pipeId} started"))
