@@ -9,10 +9,10 @@
 """
 
 #todo test if all datatypes is converted correctly
-import can import struct import time import json import threading import sys import os import subprocess
-from drivers.network_handler import Network from drivers.STTS75_driver import STTS75 from drivers.camPWM import adafruitServoPWM from drivers.camHandler import gstreamerPipe
-from functions.fFormating import getBit from functions.fFormating import getByte from functions.fFormating import getNumfrom functions.fFormating import setBit from functions.fFormating import toJson
-from functions.fPacketBuild import packetBuild from functions.fPacketDecode import packetDecode
+import can; import struct; import time; import json; import threading; import sys; import os; import subprocess
+from drivers.network_handler import Network; from drivers.STTS75_driver import STTS75; from drivers.camPWM import adafruitServoPWM; from drivers.camHandler import gstreamerPipe
+from functions.fFormating import getBit; from functions.fFormating import getByte; from functions.fFormating import getNum; from functions.fFormating import setBit; from functions.fFormating import toJson
+from functions.fPacketBuild import packetBuild; from functions.fPacketDecode import packetDecode
 import gi 
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
