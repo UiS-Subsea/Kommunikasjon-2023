@@ -41,13 +41,13 @@ class gstreamerPipe(Thread):
     def stopPipe(self):
         self.pipe.set_state(Gst.State.NULL)
         print(f"Pipe {self.pipeId} set to state null")
+    def quitLoop(self):
         self.mainLoop.quit()
         print(f"Pipe {self.pipeId} quit")
     
     def run(self):
         Gst.init([])
         self.mainLoop = GLib.MainLoop()
-        pipeline = self.createPipe()
         thread = Thread(target=self.mainLoop.run)
         thread.start()
         try:
@@ -116,10 +116,15 @@ if __name__ == "__main__":
         
     # Stop all pipes and wait for threads to finish
     stereo1_pipe.stopPipe()
+    stereo1_pipe.quitLoop()
     stereo2_pipe.stopPipe()
+    stereo1_pipe.quitLoop()
     bottom_pipe.stopPipe()
+    stereo1_pipe.quitLoop()
     manipulator_pipe.stopPipe()
+    stereo1_pipe.quitLoop()
     test_pipe.stopPipe()
+    stereo1_pipe.quitLoop()
     
     stereo1_thread.join()
     stereo2_thread.join()

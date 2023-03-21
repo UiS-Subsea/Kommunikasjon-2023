@@ -47,14 +47,15 @@ class gstreamerPipe(Thread):
     
     def runPipe(self):
         self.pipe.set_state(Gst.State.PLAYING)
+        print(f"Pipe {self.pipeId} set to state playing")
     
     def stopPipe(self):
         self.pipe.set_state(Gst.State.NULL)
         print(f"Pipe {self.pipeId} set to state null")
         self.mainLoop.quit()
-        print(f"Pipe {self.pipeId} quit")
+        print(f"Pipe {self.pipeId} main loop quit")
     
-    def run(self):
+    def runThread(self):
         Gst.init([])
         self.mainLoop = GLib.MainLoop()
         pipeline = self.createPipe()

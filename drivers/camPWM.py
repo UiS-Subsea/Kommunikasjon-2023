@@ -3,7 +3,7 @@
 """
     @file   camPWMr.py
     
-    @brief  Driver for adafruit servomotor
+    @brief  Driver for SG92 or MG90 servomotor
     @date   16.03.23 
     @author Thomas Matre
 """
@@ -19,7 +19,7 @@ def scale2x(X0, X1, Y0, Y1, inValue):
         Value = 0
     return Value
 
-class adafruitServoPWM:
+class ServoPWM:
     def __init__(self, pin=32, freq=50, startDT:float=7.5) -> None:
         self.usrpin = pin
         self.freq = freq
@@ -49,8 +49,8 @@ class adafruitServoPWM:
         GPIO.cleanup()
 
 if __name__ == '__main__':
-    pin = int(input("pin"))
-    pwm = adafruitServoPWM(pin=32,freq=50)
+    usrpin = int(input("pin"))
+    pwm = ServoPWM(pin=usrpin,freq=50)
     try:
         while True:
             a = float(input("angle: "))
