@@ -146,6 +146,8 @@ class ComHandler:
                                    }
                                 self.sendPacket(msg)
                             elif item[0] == 40 or item[0] == 41:
+                                print(item[0])
+                                print(item[1])
                                 msg = {item[0],
                                    {'int8', int(item[1][0])},
                                     {'int8', int(item[1][1])}, 
