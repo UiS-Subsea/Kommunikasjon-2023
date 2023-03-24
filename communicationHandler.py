@@ -10,7 +10,10 @@
 
 #todo test if all datatypes is converted correctly
 import can; import struct; import time; import json; import threading; import sys; import os; import subprocess
-from drivers.network_handler import Network; from drivers.STTS75_driver import STTS75; from drivers.camPWM import ServoPWM; from drivers.camHandler import gstreamerPipe
+from drivers.network_handler import Network 
+from drivers.STTS75_driver import STTS75; 
+from drivers.camPWM import ServoPWM; 
+from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild; from functions.fPacketDecode import packetDecode
 import gi 
@@ -183,6 +186,7 @@ class ComHandler:
     packet = packetBuild(tag)
     assert self.bus is not None
     try:
+      print(packet)
       self.bus.send(packet)
     except Exception as e:
       raise e
@@ -216,7 +220,7 @@ class ComHandler:
      self.bottomThread = threading.Thread(target=self.bottomPipe.run)
      self.bottomThread.start()
      self.manipulatorPipe = gstreamerPipe(pipeId="manipulator", port="5003")
-     #self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
+     self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
      #self.manipulatorThread.start()
      self.camStatus['Threads'] = True
 
