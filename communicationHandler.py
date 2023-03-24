@@ -131,34 +131,31 @@ class ComHandler:
                     if item[0] < 200:
                         print(f"recived netdata: {message}")
                         if self.status['Can']:
-                            if item[0] == 100: 
+                            if item[0] == 100:
+                                print(item[0])
+                                print[item[1]] 
                                 msg = {item[0],
-                                   {'int16', int(item[1])},
-                                   {'int16', int(item[2])},
-                                   {'int16', int(item[3])},
-                                   {'int16', int(item[4])}}
+                                   {'int16', int(item[1][0])},
+                                   {'int16', int(item[1][1])},
+                                   {'int16', int(item[1][2])},
+                                   {'int16', int(item[1][3])}}
                                 self.sendPacket(msg)
                             elif item[0] == 64:
                                 msg = {item[0],
                                    {'int16', int(item[1])}, {'int16', int(item[2])}, {'int16', int(item[3])}, {'int16', int(item[4])}
                                    }
                                 self.sendPacket(msg)
-                            elif item[0] == 40:
+                            elif item[0] == 40 or item[0] == 41:
                                 msg = {item[0],
-                                   {'int8', int(item[1])},
-                                    {'int8', int(item[2])}, 
-                                    {'int8', int(item[3])}, 
-                                    {'int8', int(item[4])},
-                                    {'int32', int(item[5:7])}
+                                   {'int8', int(item[1][0])},
+                                    {'int8', int(item[1][1])}, 
+                                    {'int8', int(item[1][2])}, 
+                                    {'int8', int(item[1][3])},
+                                    {'int8', int(item[1][4])},
+                                    {'int8', int(item[1][5])},
+                                    {'int8', int(item[1][6])},
+                                    {'int8', int(item[1][7])}
                                    }                               
-                            elif item[0] == 41:
-                               msg = {item[0],
-                                   {'int8', int(item[1])},
-                                    {'int8', int(item[2])}, 
-                                    {'int8', int(item[3])}, 
-                                    {'int8', int(item[4])},
-                                    {'int32', int(item[5:7])}
-                                   }
                             else: 
                                self.netHandler.send(toJson('Error: Unknow can id'))
                     elif item[0] == 200:
