@@ -16,6 +16,7 @@ from drivers.camPWM import ServoPWM;
 from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild; from functions.fPacketDecode import packetDecode
+from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse
 import gi 
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
@@ -117,69 +118,61 @@ class ComHandler:
         self.netTrad.start()
 
   def netCallback(self, data: bytes) -> None:
+    int8Ids   = [40, 41]
+    uint8Ids  = []
+    int16Ids  = []
+    uint16Ids = []
     data:str = bytes.decode(data, 'utf-8')
     for message in data.split(json.dumps("*")):
-        try:
-            if message == json.dumps('heartbeat') or message == "":
-                if message is None:
-                    message = ""
-                continue
-            else:
-                message = json.loads(message)
-                for item in message:
-                    if item[0] < 200:
-                        if self.status['Can']:
-                            if item[0] == 100:
-                                msg = {item[0],
-                                   {'int16', int(item[1][0])},
-                                   {'int16', int(item[1][1])},
-                                   {'int16', int(item[1][2])},
-                                   {'int16', int(item[1][3])}}
-                                self.sendPacket(msg)
-                            elif item[0] == 64:
-                                msg = {item[0],
-                                   {'int16', int(item[1])}, {'int16', int(item[2])}, {'int16', int(item[3])}, {'int16', int(item[4])}
-                                   }
-                                self.sendPacket(msg)
-                            elif item[0] == 40 or item[0] == 41:
-                                msg = [item[0],
-                                    ['int8', int(item[1][0])],
-                                    ['int8', int(item[1][1])], 
-                                    ['int8', int(item[1][2])], 
-                                    ['int8', int(item[1][3])],
-                                    ['int8', int(item[1][4])],
-                                    ['int8', int(item[1][5])],
-                                    ['int8', int(item[1][6])],
-                                    ['int8', int(item[1][7])]
-                                ]
-                                self.sendPacket(msg)
-                            else: 
-                               self.netHandler.send(toJson('Error: Unknow can id'))
-                    elif item[0] == 200:
-                        if item[1] == 'tilt':
-                          if item[2] == 1:
-                            if not self.camStatus['S1']:
-                                self.camStart('stereo1')
-                            elif self.camStatus['S1']:
-                                self.camStop('stereo1')
-                          elif item[2] == 2:
-                            if not self.camStatus['S2']:
-                                self.camStart('stereo2')
-                            elif self.camStatus['S2']:
-                                self.camStop('stereo2')
-                          elif item[2] == 3:
-                            if not self.camStatus['Bottom']:
-                                self.camStart('bottom')
-                            elif self.camStatus['Bottom']:
-                                self.camStop('bottom')                        
-                          elif item[2] == 4:
-                            if not self.camStatus['Manipulator']:
-                                self.camStart('manipulator')
-                            elif self.camStatus['Manupulator']:
-                                self.camStop('manipulator')                                
-                        else:
-                            self.netHandler.send(toJson("Error: Canbus not initialised"))
-        except Exception as e:
+      try:
+        if message == json.dumps('heartbeat') or message == "":
+          if message is None:
+            message = ""
+            continue
+        else:
+          message = json.loads(message)
+          for item in message:
+            if 32 <= item[0] <= 159:
+              if self.status['Can']:
+                if item[0] in int8Ids:
+                  msg = int8Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in uint8Ids:
+                  msg = uint8Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in int16Ids:
+                  msg = int16Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in uint16Ids:
+                  msg = uint16Parse(item)
+                  self.sendPacket(msg)
+                else: 
+                  self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing list'))
+              else:
+                self.netHandler.send(toJson("Error: Canbus not initialised"))
+            elif item[0] == 200:
+              if item[1] == 'tilt':
+                if item[2] == 1:
+                  if not self.camStatus['S1']:
+                    self.camStart('stereo1')
+                  elif self.camStatus['S1']:
+                    self.camStop('stereo1')
+                elif item[2] == 2:
+                  if not self.camStatus['S2']:
+                    self.camStart('stereo2')
+                  elif self.camStatus['S2']:
+                    self.camStop('stereo2')
+                elif item[2] == 3:
+                  if not self.camStatus['Bottom']:
+                    self.camStart('bottom')
+                  elif self.camStatus['Bottom']:
+                    self.camStop('bottom')                        
+                elif item[2] == 4:
+                  if not self.camStatus['Manipulator']:
+                    self.camStart('manipulator')
+                  elif self.camStatus['Manupulator']:
+                    self.camStop('manipulator')                                
+      except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
   def canInit(self):
@@ -191,9 +184,8 @@ class ComHandler:
     self.bus.set_filters(self.canFilters)
     self.status['Can'] = True
     self.notifier = can.Notifier(self.bus, [self.readPacket])
-    #self.timeout = 0.1 # todo kan denne fjernes?
+    self.timeout = 0.1
 
-  
   def sendPacket(self, tag):
     packet = packetBuild(tag)
     assert self.bus is not None
