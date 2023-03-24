@@ -40,6 +40,6 @@ def packetBuild(tags):
           print(f"idDataByte={idDataByte}")
         msg = idDataByte
     except ValueError as error:
-       return f"Error in building can message: {tags} "
+      return f"Error in building can message: {tags} "
     print(msg)
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)

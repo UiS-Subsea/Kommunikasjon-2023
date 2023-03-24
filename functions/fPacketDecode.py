@@ -17,11 +17,10 @@ def packetDecode(msg, ucFlags):
   canID = msg.arbitration_id
   dataByte = msg.data
   hbIds     = [155, 156, 157, 158, 159]
-  int8Ids   = [1,2,3,4,5,6,7,8]
-  uint8Ids  = [9,10,11]
-  int16Ids  = [50,51,52,134,135,136]
-  uint16Ids = [12,13,14,15]
-
+  int8Ids   = []
+  uint8Ids  = []
+  int16Ids  = [134,135,136]
+  uint16Ids = []
   try:
     if canID in hbIds:
       pack = dataByte[0:6].decode('utf-8')
@@ -68,12 +67,6 @@ def packetDecode(msg, ucFlags):
       pack7 = getNum("uint8", dataByte[6])
       pack8 = getNum("uint8", dataByte[7])
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
-    elif canID == 52:
-      pack1 = getNum("int32", dataByte[0:4])
-      pack2 = getNum("int8",  dataByte[4])
-      pack3 = getNum("uint8", dataByte[5])
-      pack4 = getNum("uint16", dataByte[6:8])
-      jsonDict = {canID: (pack1, pack2, pack3, pack4)}
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
