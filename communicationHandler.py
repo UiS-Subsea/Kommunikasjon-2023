@@ -141,6 +141,22 @@ class ComHandler:
                                    {'int16', int(item[1])}, {'int16', int(item[2])}, {'int16', int(item[3])}, {'int16', int(item[4])}
                                    }
                                 self.sendPacket(msg)
+                            elif item[0] == 40:
+                                msg = {item[0],
+                                   {'int8', int(item[1])},
+                                    {'int8', int(item[2])}, 
+                                    {'int8', int(item[3])}, 
+                                    {'int8', int(item[4])},
+                                    {'int32', int(item[5:7])}
+                                   }                               
+                            elif item[0] == 41:
+                               msg = {item[0],
+                                   {'int8', int(item[1])},
+                                    {'int8', int(item[2])}, 
+                                    {'int8', int(item[3])}, 
+                                    {'int8', int(item[4])},
+                                    {'int32', int(item[5:7])}
+                                   }
                             else: 
                                self.netHandler.send(toJson('Error: Unknow can id'))
                     elif item[0] == 200:
@@ -186,7 +202,7 @@ class ComHandler:
     packet = packetBuild(tag)
     assert self.bus is not None
     try:
-      print(packet)
+      #print(packet)
       self.bus.send(packet)
     except Exception as e:
       raise e
