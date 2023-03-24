@@ -54,13 +54,14 @@ class gstreamerPipe(Thread):
     def stopPipe(self):
         self.pipe.set_state(Gst.State.NULL)
         print(f"Pipe {self.pipeId} set to state null")
+        
+    def quitLoop(self):
         self.mainLoop.quit()
         print(f"Pipe {self.pipeId} main loop quit")
     
     def runThread(self):
         Gst.init([])
         self.mainLoop = GLib.MainLoop()
-        pipeline = self.createPipe()
         thread = Thread(target=self.mainLoop.run)
         thread.start()
         try:

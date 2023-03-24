@@ -10,11 +10,8 @@
 
 import can
 import struct
-from functions.fFormating import getBit
-from functions.fFormating import getByte
-from functions.fFormating import getNum
-from functions.fFormating import setBit
-from functions.fFormating import toJson
+from functions.fFormating import getBit, getByte, getNum, setBit, toJson
+
 
 def packetDecode(msg, ucFlags):
   canID = msg.arbitration_id

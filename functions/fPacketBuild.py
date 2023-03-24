@@ -9,11 +9,8 @@
 """
 import can
 import struct
-from functions.fFormating import getBit
-from functions.fFormating import getByte
-from functions.fFormating import getNum
-from functions.fFormating import setBit
-from functions.fFormating import toJson
+from functions.fFormating import getBit, getByte, getNum, setBit, toJson
+
 
 def packetBuild(tags):
   if tags in [63, 95, 125, 126, 127]: 
