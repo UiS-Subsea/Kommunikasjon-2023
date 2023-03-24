@@ -158,7 +158,8 @@ class ComHandler:
                                     {'int8', int(item[1][5])},
                                     {'int8', int(item[1][6])},
                                     {'int8', int(item[1][7])}
-                                ]                            
+                                ]
+                                self.sendPacket(msg)
                             else: 
                                self.netHandler.send(toJson('Error: Unknow can id'))
                     elif item[0] == 200:
