@@ -126,6 +126,7 @@ class ComHandler:
                 continue
             else:
                 message = json.loads(message)
+                print(message)
                 for item in message:
                     if item[0] < 200:
                         if self.status['Can']:
