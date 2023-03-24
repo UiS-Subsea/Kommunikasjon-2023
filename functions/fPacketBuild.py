@@ -11,6 +11,17 @@ import can
 import struct
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 
+can_types = {
+    "int8": "<b",
+    "uint8": "<B",
+    "int16": "<h",
+    "uint16": "<H",
+    "int32": "<i",
+    "uint32": "<I",
+    "int64": "<q",
+    "uint64": "<Q",
+    "float": "<f"
+}
 
 def packetBuild(tags):
   if tags in [63, 95, 125, 126, 127]: 

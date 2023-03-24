@@ -19,7 +19,7 @@ def packetDecode(msg, ucFlags):
   hbIds     = [155, 156, 157, 158, 159]
   int8Ids   = [1,2,3,4,5,6,7,8]
   uint8Ids  = [9,10,11]
-  int16Ids  = [50,51,52]
+  int16Ids  = [50,51,52,134,135,136]
   uint16Ids = [12,13,14,15]
 
   try:
