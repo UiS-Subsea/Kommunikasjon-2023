@@ -220,7 +220,7 @@ class ComHandler:
      self.bottomThread = threading.Thread(target=self.bottomPipe.run)
      self.bottomThread.start()
      self.manipulatorPipe = gstreamerPipe(pipeId="manipulator", port="5003")
-     self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
+     #self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
      #self.manipulatorThread.start()
      self.camStatus['Threads'] = True
 
