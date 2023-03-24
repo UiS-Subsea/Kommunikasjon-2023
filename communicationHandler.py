@@ -129,6 +129,7 @@ class ComHandler:
                 print(message)
                 for item in message:
                     if item[0] < 200:
+                        print(f"recived netdata: {message}")
                         if self.status['Can']:
                             if item[0] == 100: 
                                 msg = {item[0],
