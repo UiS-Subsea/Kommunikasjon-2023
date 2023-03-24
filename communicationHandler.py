@@ -150,14 +150,14 @@ class ComHandler:
                                 print(item[1])
                                 print(item[1][1])
                                 msg = [item[0],
-                                    {'int8', int(item[1][0])},
-                                    {'int8', int(item[1][1])}, 
-                                    {'int8', int(item[1][2])}, 
-                                    {'int8', int(item[1][3])},
-                                    {'int8', int(item[1][4])},
-                                    {'int8', int(item[1][5])},
-                                    {'int8', int(item[1][6])},
-                                    {'int8', int(item[1][7])}
+                                    ['int8', int(item[1][0])],
+                                    ['int8', int(item[1][1])], 
+                                    ['int8', int(item[1][2])], 
+                                    ['int8', int(item[1][3])],
+                                    ['int8', int(item[1][4])],
+                                    ['int8', int(item[1][5])],
+                                    ['int8', int(item[1][6])],
+                                    ['int8', int(item[1][7])]
                                 ]
                                 self.sendPacket(msg)
                             else: 
