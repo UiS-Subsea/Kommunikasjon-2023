@@ -133,7 +133,7 @@ class ComHandler:
                         if self.status['Can']:
                             if item[0] == 100:
                                 print(item[0])
-                                print[item[1]] 
+                                print(item[1]) 
                                 msg = {item[0],
                                    {'int16', int(item[1][0])},
                                    {'int16', int(item[1][1])},
@@ -148,6 +148,7 @@ class ComHandler:
                             elif item[0] == 40 or item[0] == 41:
                                 print(item[0])
                                 print(item[1])
+                                print(item[1][1])
                                 msg = {item[0],
                                    {'int8', int(item[1][0])},
                                     {'int8', int(item[1][1])}, 
