@@ -126,14 +126,10 @@ class ComHandler:
                 continue
             else:
                 message = json.loads(message)
-                print(message)
                 for item in message:
                     if item[0] < 200:
-                        print(f"recived netdata: {message}")
                         if self.status['Can']:
                             if item[0] == 100:
-                                print(item[0])
-                                print(item[1]) 
                                 msg = {item[0],
                                    {'int16', int(item[1][0])},
                                    {'int16', int(item[1][1])},
@@ -146,9 +142,6 @@ class ComHandler:
                                    }
                                 self.sendPacket(msg)
                             elif item[0] == 40 or item[0] == 41:
-                                print(item[0])
-                                print(item[1])
-                                print(item[1][1])
                                 msg = [item[0],
                                     ['int8', int(item[1][0])],
                                     ['int8', int(item[1][1])], 
@@ -239,8 +232,8 @@ class ComHandler:
      self.bottomThread = threading.Thread(target=self.bottomPipe.run)
      self.bottomThread.start()
      self.manipulatorPipe = gstreamerPipe(pipeId="manipulator", port="5003")
-     #self.manipulatorThread = gstreamerPipe(target=self.manipulatorPipe.run)
-     #self.manipulatorThread.start()
+     self.manipulatorThread = threading.Thread(target=self.manipulatorPipe.run)
+     self.manipulatorThread.start()
      self.camStatus['Threads'] = True
 
   def camStart(self, pipeId):
