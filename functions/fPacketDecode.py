@@ -78,7 +78,7 @@ def packetDecode(msg, ucFlags):
       #  INIT_ERROR = getBit(dataByte[0], 1)
       #  HAL_ERROR = getBit(dataByte[0], 1)
       #  HAL_ERROR = getBit(dataByte[0], 1)
-      for i, byte in dataByte:
+      for i, byte in enumerate(dataByte):
         print("in for")
         print (i)
         if i == 3:
