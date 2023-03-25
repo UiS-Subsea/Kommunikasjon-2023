@@ -80,6 +80,7 @@ def packetDecode(msg, ucFlags):
       #  HAL_ERROR = getBit(dataByte[0], 1)
       for i, byte in dataByte:
         print("in for")
+        print (i)
         if i == 3:
           print(dataByte[i])
           print(byte)
