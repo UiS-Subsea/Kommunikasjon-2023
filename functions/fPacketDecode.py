@@ -83,7 +83,7 @@ def packetDecode(msg, ucFlags):
           for j in range(4):
             if getBit(byte, j):
               sensorAlarms.append(f"Lekasje probe: {j+1}. ")
-      
+      print(sensorAlarms)
       jsonDict = {"Alarm": f"Sensor: {sensorAlarms}"}
 
     else:
