@@ -80,8 +80,11 @@ def packetDecode(msg, ucFlags):
       #  HAL_ERROR = getBit(dataByte[0], 1)
       for i, byte in dataByte:
         if i == 3:
+          print(dataByte[i])
+          print(byte)
           for j in range(4):
             if getBit(byte, j):
+              print("alarm")
               sensorAlarms.append(f"Lekasje probe: {j+1}. ")
       print(sensorAlarms)
       jsonDict = {"Alarm": f"Sensor: {sensorAlarms}"}
