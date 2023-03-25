@@ -215,7 +215,7 @@ class ComHandler:
       msg = packetDecode(can, self.uCstatus)
       self.netHandler.send(msg)
     except Exception as e:
-      print(f'Feilkode i readPacket, feilmelding: {e}\n\t{msg}')
+      print(f'Feilkode i readPacket, feilmelding: {e}\n\t{can.data}')
         
   def heartBeat(self):
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
