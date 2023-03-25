@@ -1,3 +1,13 @@
+#!/usr/bin/python3
+
+"""
+    @file   packetBuild.py
+    
+    @brief  Parse TCP messages to prepare for fPacketBuild
+    @date   16.03.23 
+    @author Thomas Matre
+"""
+
 import json
 
 #standard packs

@@ -3,7 +3,7 @@
 """
     @file   packetBuild.py
     
-    @brief  
+    @brief  Build CAN messages
     @date   16.03.23 
     @author Thomas Matre
 """

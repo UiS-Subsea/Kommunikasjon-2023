@@ -3,7 +3,7 @@
 """
     @file   commmunicationHandler.py
     
-    @brief  
+    @brief  Decode CAN messages and parse to TCP messages
     @date   10.03.23 
     @author Thomas Matre
 """
