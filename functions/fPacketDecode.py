@@ -69,6 +69,7 @@ def packetDecode(msg, ucFlags):
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
     elif canID == 140:
       sensorAlarms = []
+      print(f"in id150 with message: {dataByte}")
       #if not (dataByte[0], 0):
       #  OK = getBit(dataByte[0], 1)
       #  HAL_ERROR = getBit(dataByte[0], 1)
