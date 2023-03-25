@@ -67,7 +67,7 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
         msg = toJson({"Alarm": f"uC {flag} not responding on CANBus"})
         netHandler.send(msg)
         time.sleep(0.2)
-    print("Heartbeat thread stopped")
+  print("Heartbeat thread stopped")
 
 def i2cThread(netHandler, STTS75, systemFlag):
   print("i2c Thread started")

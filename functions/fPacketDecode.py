@@ -16,11 +16,11 @@ from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 def packetDecode(msg, ucFlags):
   canID = msg.arbitration_id
   dataByte = msg.data
-  hbIds     = [155, 156, 157, 158, 159]
-  int8Ids   = []
-  uint8Ids  = []
-  int16Ids  = [134,135,136]
-  uint16Ids = []
+  hbIds        = [155, 156, 157, 158, 159]
+  int8Ids      = []
+  uint8Ids     = []
+  int16Ids     = [134,135,136]
+  uint16Ids    = []
   try:
     if canID in hbIds:
       pack = dataByte[0:6].decode('utf-8')
@@ -67,6 +67,24 @@ def packetDecode(msg, ucFlags):
       pack7 = getNum("uint8", dataByte[6])
       pack8 = getNum("uint8", dataByte[7])
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
+    elif canID == 140:
+      sensorAlarms = []
+      #if not (dataByte[0], 0):
+      #  OK = getBit(dataByte[0], 1)
+      #  HAL_ERROR = getBit(dataByte[0], 1)
+      #  HAL_BUSY = getBit(dataByte[0], 1)
+      #  HAL_TIMEOUT = getBit(dataByte[0], 1)
+      #  INIT_ERROR = getBit(dataByte[0], 1)
+      #  HAL_ERROR = getBit(dataByte[0], 1)
+      #  HAL_ERROR = getBit(dataByte[0], 1)
+      for i, byte in dataByte:
+        if i == 3:
+          for j in range(4):
+            if getBit(byte, j):
+              sensorAlarms.append(f"Lekasje probe {j+1}. ")
+      
+      jsonDict = {"Alarm": f"{[sensorAlarms]}"}
+
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
