@@ -84,7 +84,7 @@ def packetDecode(msg, ucFlags):
             if getBit(byte, j):
               sensorAlarms.append(f"Lekasje probe {j+1}. ")
       
-      jsonDict = {"Alarm": f"{[sensorAlarms]}"}
+      jsonDict = {"Alarm": f"Sensor: {[sensorAlarms]}"}
 
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
