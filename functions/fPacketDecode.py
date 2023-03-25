@@ -69,7 +69,6 @@ def packetDecode(msg, ucFlags):
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
     elif canID == 140:
       sensorAlarms = []
-      print(f"in id150 with message: {dataByte}")
       #if not (dataByte[0], 0):
       #  OK = getBit(dataByte[0], 1)
       #  HAL_ERROR = getBit(dataByte[0], 1)
@@ -79,18 +78,14 @@ def packetDecode(msg, ucFlags):
       #  HAL_ERROR = getBit(dataByte[0], 1)
       #  HAL_ERROR = getBit(dataByte[0], 1)
       for i, byte in enumerate(dataByte):
-        print("in for")
-        print (i)
         if i == 3:
           print(dataByte[i])
           print(byte)
           for j in range(4):
             if getBit(byte, j):
-              print("alarm")
-              sensorAlarms.append(f"Lekasje probe: {j+1}. ")
-      print(sensorAlarms)
-      jsonDict = {"Alarm": f"Sensor: {sensorAlarms}"}
-
+              sensorAlarms.append(f"Lekasje probe: {j+1}")
+      if sensorAlarms:
+        jsonDict = {"Alarm": f"Sensor: {sensorAlarms}"}
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
