@@ -23,16 +23,16 @@ from gi.repository import Gst, GLib
 
 
 can_types = {
-    "int8": "<b",
-    "uint8": "<B",
-    "int16": "<h",
+    "int8"  : "<b",
+    "uint8" : "<B",
+    "int16" : "<h",
     "uint16": "<H",
-    "int32": "<i",
+    "int32" : "<i",
     "uint32": "<I",
-    "int64": "<q",
+    "int64" : "<q",
     "uint64": "<Q",
-    "float": "<f"
-}
+    "float" : "<f"
+            }
 
 
 # Reads data from network port
@@ -87,7 +87,8 @@ class ComHandler:
     self.canifaceType  = canifaceType
     self.canifaceName  = canifaceName
     self.status    = {'Net': False, 
-                      'Can': False}
+                      'Can': False
+                     }
     self.uCstatus  = {'Reg': False, 
                       'Sensor': False, 
                       '12Vman': False, 
@@ -241,14 +242,17 @@ class ComHandler:
     self.manipulatorThread = threading.Thread(target=self.manipulatorPipe.run)
     self.manipulatorThread.start()
     self.camStatus['Threads'] = True
+    self.camStart('stereo1')
+    self.camStart('bottom')
+    self.camStart('manipulator')
 
   def camStart(self, pipeId):
     if pipeId == 'stereo1':
       self.stereo1Pipe.runPipe()
       self.camStatus['S1'] = True
-    elif pipeId == 'stereo2':
-      self.stereo2Pipe.runPipe()
-      self.camStatus['S2'] = True
+    #elif pipeId == 'stereo2':
+      #self.stereo2Pipe.runPipe()
+      #self.camStatus['S2'] = True
     elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
       self.bottomPipe.runPipe()
       self.camStatus['bottom'] = True
