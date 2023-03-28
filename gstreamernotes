@@ -1,4 +1,10 @@
+#Transfer files
+
+scp -r Repo/Kommunikasjon-2023/ jetson@10.0.0.2:~/
+
 #Gstreamer Notes;
+
+
 
 gst-launch-1.0 -vvv v4l2src device=/dev/video0 do-timestamp=true ! image/jpeg, width=3264, height=2448, framerate=15/1 ! jpegparse ! nvjpegdec ! 'video/x-raw' ! nvvidconv ! 'video/x-raw(memory:NVMM),format=I420,width=1920,height=1080' ! nvoverlaysink
 

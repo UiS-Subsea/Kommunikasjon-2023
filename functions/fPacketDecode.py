@@ -19,7 +19,7 @@ def packetDecode(msg, ucFlags):
   hbIds        = [155, 156, 157, 158, 159]
   int8Ids      = []
   uint8Ids     = []
-  int16Ids     = [134,135,136]
+  int16Ids     = [134,135,136,139]
   uint16Ids    = []
   try:
     if canID in hbIds:
