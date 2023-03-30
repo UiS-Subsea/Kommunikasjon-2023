@@ -1,16 +1,12 @@
 #!/usr/bin/python3
-
 """
-    @file   commmunicationHandler.py
+    @file   latencyServer.py
     
     @brief  
-    @date   10.03.23 
+    @date   30.03.23 
     @author Thomas Matre
 """
-
-#todo test if all datatypes is converted correctly
 import can, struct, time, json, threading, socket
-from network_handler import Network
 
 can_types = {
     "int8": "<b",
