@@ -13,12 +13,11 @@ def netHandler(ip, port, meld):
   time_list = []
   time_listms = []
   message_list = []
-  NoOfPacks = 10000
-
+  NoOfPacks = 5000
   try:
     network_socket.connect((ip, port))
     print(f"Connected to IP:{ip} with PORT:{port}")
-    for i in range(30):
+    for i in range(5):
         print(i)
         time.sleep(1)
     print("starting to send")
@@ -26,6 +25,9 @@ def netHandler(ip, port, meld):
     print(e)
     print("Could not connect to network")
     exit()
+  #ping msg
+  network_socket.sendall(meld)
+  recmeld = network_socket.recv(1024)
   for __ in range(NoOfPacks):
     try:
       start = time.time_ns()
@@ -35,7 +37,7 @@ def netHandler(ip, port, meld):
       for message in data.split(json.dumps("*")):
         if "139" in message:
           tid = time.time_ns()-start
-          time_list.append(tid)
+          time_list.append(tid)           
     except Exception as e:
             print(e)
             print("Connection lost")

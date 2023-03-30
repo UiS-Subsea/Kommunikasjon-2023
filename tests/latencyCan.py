@@ -9,7 +9,7 @@
 """
 
 #todo test if all datatypes is converted correctly
-import can, struct, time, json, threading, socket
+import can, struct, time, json, threading, socket, statistics
 from network_handler import Network
 
 can_types = {
@@ -55,19 +55,8 @@ def packetDecode(msg):
       pack7 = getNum("int8", dataByte[6])
       pack8 = getNum("int8", dataByte[7])
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
-  return toJson(jsonDict)
+  return canID
 
-def int8Parse(item):
-  msg = [item[0], 
-        ['int8', int(item[1][0])], 
-        ['int8', int(item[1][1])], 
-        ['int8', int(item[1][2])], 
-        ['int8', int(item[1][3])],
-        ['int8', int(item[1][4])],
-        ['int8', int(item[1][5])],
-        ['int8', int(item[1][6])],
-        ['int8', int(item[1][7])]]
-  return msg
 
 # Reads data from network port
 def netThread(network, netCallback, flag):
@@ -75,7 +64,7 @@ def netThread(network, netCallback, flag):
   flag['Net'] = True
   while flag['Net']:
     try:
-      msg = network.recv(1024)
+      msg = network.receive()
       if msg == b"" or msg is None:
         continue
       else:
@@ -103,41 +92,8 @@ class ComHandler:
                        "extended": False 
                       }]
     self.canInit()
-    self.connectIp = ip
-    self.connectPort = port
-    self.netInit()
-
-  def netInit(self):
-    self.netSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.netSocket.bind((self.connectIp, self.connectPort))
-    self.netSocket.listen()
-    self.netHandler, self.network_address = self.netSocket.accept()
-    self.netTrad = threading.Thread(name="Network_thread",target=netThread, daemon=True, args=(self.netHandler, self.netCallback, self.status))
-    self.netTrad.start()
 
 
-  def netCallback(self, data: bytes) -> None:
-    int8Ids   = [9, 10]
-    data:str = bytes.decode(data, 'utf-8')
-    for message in data.split(json.dumps("*")):
-      try:
-        if message == json.dumps('heartbeat') or message == "":
-          if message is None:
-            message = ""
-            continue
-        else:
-          message = json.loads(message)
-          for item in message:
-            if self.status['Can']:
-              if item[0] in int8Ids:
-                  msg = int8Parse(item)
-                  self.sendPacket(msg)
-              else: 
-                self.netHandler.sendall(toJson(f'Error: canId: {message[0]} not in Parsing list'))
-            else:
-              self.netHandler.sendall(toJson("Error: Canbus not initialised"))                               
-      except Exception as e:
-            print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
   def canInit(self):
     self.bus = can.Bus(
@@ -146,29 +102,54 @@ class ComHandler:
       receive_own_messages  = False,
       fd                    = False)
     self.bus.set_filters(self.canFilters)
-    self.status['Can'] = True
-    self.notifier = can.Notifier(self.bus, [self.readPacket])
-    self.timeout = 0.1
 
   def sendPacket(self, tag):
-    packet = packetBuild(tag)
+    packet = tag
     assert self.bus is not None
     try:
       self.bus.send(packet)
     except Exception as e:
       print(f'Feilkode i sendPacket, feilmelding: {e}\n\t{packet}')
 
-  def readPacket(self, can):
+  def readPacket(self):
     self.bus.socket.settimeout(0)
+    msg = self.bus.recv()
     try:
-      msg = packetDecode(can)
-      self.netHandler.sendall(msg)
+      msg = packetDecode(msg)
+      return msg
     except Exception as e:
-      print(f'Feilkode i readPacket, feilmelding: {e}\n\t{can.data}')
+      print(f'Feilkode i readPacket, feilmelding: {e}\n\t{msg}')
 
      
 
 if __name__ == "__main__":
+  time_list = []
+  time_listms = []
+  NoOfPacks = 1000
+  msg_list = []
+  i = 0
+  buffermsg = can.Message(arbitration_id=9, data=[2,2,2,2,2,2,2,2], is_extended_id=False)
+  msg_list.append(can.Message(arbitration_id=9, data=[1,2,3,4,5,6,7,8], is_extended_id=False))
+  msg_list.append(can.Message(arbitration_id=9, data=[9,10,11,12,13,14,15,16], is_extended_id=False))
+  msg_list.append(can.Message(arbitration_id=9, data=[17,18,19,20,21,22,23,24], is_extended_id=False))
+
   c = ComHandler()
-  while True:
-    time.sleep(0.1)
+  time.sleep(2)
+  for __ in range(NoOfPacks):
+    if i > 3:
+      i = 0
+    start = time.time()
+    c.sendPacket(msg_list[0])
+    recmsg = c.readPacket()
+    if recmsg == 139:
+      tid = time.time()-start
+      time_list.append(tid)
+    i = i+1
+  time.sleep(1)
+  for i, time_entry in enumerate(time_list):
+     newtime = round(float(time_entry)  * (10**3), 2)
+     if newtime >= 3:
+       print(f"Entry:{i} with time: {newtime}")
+     time_listms.append(newtime)
+  print (f'Mean:{statistics.mean(time_listms)}\n Max:{max(time_listms)} \n Min:{min(time_listms)} \n Packets sent: {NoOfPacks} \n Packets recived: {len(time_listms)}')
+
