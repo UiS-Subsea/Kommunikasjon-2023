@@ -126,26 +126,22 @@ if __name__ == "__main__":
   time_list = []
   time_listms = []
   NoOfPacks = 1000
-  msg_list = []
-  i = 0
-  buffermsg = can.Message(arbitration_id=9, data=[2,2,2,2,2,2,2,2], is_extended_id=False)
-  msg_list.append(can.Message(arbitration_id=9, data=[1,2,3,4,5,6,7,8], is_extended_id=False))
-  msg_list.append(can.Message(arbitration_id=9, data=[9,10,11,12,13,14,15,16], is_extended_id=False))
-  msg_list.append(can.Message(arbitration_id=9, data=[17,18,19,20,21,22,23,24], is_extended_id=False))
-
+  msg = can.Message(arbitration_id=9, data=[0,1,2,3,4,5,6,7], is_extended_id=False)
   c = ComHandler()
-  time.sleep(2)
+  for i in range(5):
+    print(i)
+    time.sleep(1)
+
   for __ in range(NoOfPacks):
-    if i > 3:
-      i = 0
     start = time.time()
-    c.sendPacket(msg_list[0])
+    c.sendPacket(msg)
     recmsg = c.readPacket()
     if recmsg == 139:
       tid = time.time()-start
       time_list.append(tid)
-    i = i+1
+
   time.sleep(1)
+
   for i, time_entry in enumerate(time_list):
      newtime = round(float(time_entry)  * (10**3), 2)
      if newtime >= 3:
