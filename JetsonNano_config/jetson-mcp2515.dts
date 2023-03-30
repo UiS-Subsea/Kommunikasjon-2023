@@ -109,6 +109,13 @@
                     nvidia,enable-input = <0x1>;
                     nvidia,io-high-voltage = <0x1>;
                 };
+                pin32 {
+                    nvidia,function = "pwm0";
+                    nvidia,pins = "lcd_bl_pwm_pv0";
+                    nvidia,pull = <0x0>;
+                    nvidia,tristate = <0x0>;
+                    nvidia,enable-input = <0x0>;
+                };
                 pin33 {
                     nvidia,function = "pwm2";
                     nvidia,pins = "pe6";

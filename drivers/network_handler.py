@@ -162,7 +162,7 @@ if __name__ == "__main__":
         # a = subprocess.Popen("ssh rov touch test")
         # print(os.system("ssh rov touch test")) # python3 ~/socket_testing/network_handler.py"))
         # exit()
-        client_conn = Network(is_server=False, bind_addr="0.0.0.0", connect_addr="10.0.0.187")
+        client_conn = Network(is_server=False, bind_addr="0.0.0.0", connect_addr="10.0.0.2")
         nw = threading.Thread(name="Recv_test_tread",target=recieve_forever, daemon=True, args=([client_conn]))
         nw.start()
         while True:
@@ -190,7 +190,8 @@ if __name__ == "__main__":
                 for _ in range(10):
                     asd = [70]
             elif a == 'pic':
-                asd = [[200, {"take_pic": int(7)}]]
+                a = input("Toggle what camera?")
+                asd = [[200, {"camera": int(7)}]]
             elif a == 'id':
                 a = input("ID\n")
                 asd = [[int(a),{int(15),int(34),int(45),int(466)}]]
