@@ -148,7 +148,7 @@ def recieve_forever(conn):
 
 if __name__ == "__main__":
     print(sys.platform)
-    if sys.platform == "win32":
+    if sys.platform != "win32":
         server_conn = Network(is_server=False, bind_addr="0.0.0.0", connect_addr="10.0.0.187")
         # server_conn = Network(is_server=True, bind_addr="127.0.0.1")
         # threading.Thread(target=recieve_forever).start()
