@@ -68,22 +68,36 @@ def packetDecode(msg, ucFlags):
       pack8 = getNum("uint8", dataByte[7])
       jsonDict = {canID: (pack1, pack2, pack3, pack4, pack5, pack6, pack7, pack8)}
     elif canID == 140:
-      sensorAlarms = []
-      #if not (dataByte[0], 0):
-      #  OK = getBit(dataByte[0], 1)
-      #  HAL_ERROR = getBit(dataByte[0], 1)
-      #  HAL_BUSY = getBit(dataByte[0], 1)
-      #  HAL_TIMEOUT = getBit(dataByte[0], 1)
-      #  INIT_ERROR = getBit(dataByte[0], 1)
-      #  HAL_ERROR = getBit(dataByte[0], 1)
-      #  HAL_ERROR = getBit(dataByte[0], 1)
+      imuErrors     = [False, False, False, False, False, False, False, False]
+      tempErrors    = [False, False, False, False]
+      pressureErrors= [False, False, False, False]
+      lekageAlarms  = [False, False, False, False]
       for i, byte in enumerate(dataByte):
-        if i == 3:
+        if i == 0:
+          for j in range(8):
+            if getBit(byte, j):
+              imuErrors[j] = True
+            else:
+              imuErrors[j] = False
+        elif i == 1:
           for j in range(4):
             if getBit(byte, j):
-              sensorAlarms.append(f"Lekasje probe: {j+1}")
-      if sensorAlarms:
-        jsonDict = {"Alarm": f"Sensor: {sensorAlarms}"}
+              tempErrors[j] = True
+            else:
+              tempErrors[j] = False
+        elif i == 2:
+          for j in range(4):
+            if getBit(byte, j):
+              pressureErrors[j] = True
+            else:
+              pressureErrors[j] = False
+        elif i == 3:
+          for j in range(4):
+            if getBit(byte, j):
+              lekageAlarms[j] = True
+            else:
+              lekageAlarms[j] = False
+      jsonDict = {canID: (imuErrors, tempErrors, pressureErrors, lekageAlarms)}
     else:
       print(f"Unknown CanID: {canID} recived from ROV system")
       jsonDict = {"Error": f"Unknown CanID: {canID} recived from ROV system"}
