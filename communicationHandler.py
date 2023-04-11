@@ -251,9 +251,9 @@ class ComHandler:
     if pipeId == 'stereo1':
       self.stereo1Pipe.runPipe()
       self.camStatus['S1'] = True
-    #elif pipeId == 'stereo2':
-      #self.stereo2Pipe.runPipe()
-      #self.camStatus['S2'] = True
+    elif pipeId == 'stereo2':
+      self.stereo2Pipe.runPipe()
+      self.camStatus['S2'] = True
     elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
       self.bottomPipe.runPipe()
       self.camStatus['bottom'] = True
