@@ -243,6 +243,7 @@ class ComHandler:
     self.manipulatorThread.start()
     self.camStatus['Threads'] = True
     self.camStart('stereo1')
+    self.camStart('stereo2')
     self.camStart('bottom')
     self.camStart('manipulator')
 
