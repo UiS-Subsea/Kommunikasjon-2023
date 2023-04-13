@@ -224,7 +224,7 @@ class ComHandler:
   
   def i2cInit(self):
     self.STTS75 = STTS75() 
-    self.i2cThread = threading.Thread(name="i2cThread" ,target=i2cThread,daemon=True, args=(self.netHandler, self.STTS75, self.status))
+    self.i2cThread = threading.Thread(name="i2cThread" ,target=i2cThread, daemon=True, args=(self.netHandler, self.STTS75, self.status))
     self.i2cThread.start()
 
   def camInit(self):
