@@ -1,0 +1,10 @@
+[Unit]
+Description=Set up CAN0 interface
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c 'sudo ip link set can0 up type can bitrate 500000'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

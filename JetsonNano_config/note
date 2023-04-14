@@ -1,0 +1,4 @@
+sudo nano /etc/network/interfaces.d/eth0.cfg
+auto eth0
+iface eth0 inet dhcp
+post-up ip route add 224.0.0.0/4 dev eth0
