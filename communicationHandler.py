@@ -54,7 +54,8 @@ def netThread(netHandler, netCallback, flag):
 
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
-  hbIds = [63, 95 ,125, 126, 127]
+  #hbIds = [63, 95 ,125, 126, 127]
+  hbIds = [125]
   while systemFlag['Can']:
     for flag in ucFlags:
       ucFlags[flag] = False
@@ -136,7 +137,7 @@ class ComHandler:
   def netCallback(self, data: bytes) -> None:
     int8Ids   = [40, 41]
     uint8Ids  = []
-    int16Ids  = []
+    int16Ids  = [100]
     uint16Ids = []
     data:str = bytes.decode(data, 'utf-8')
     for message in data.split(json.dumps("*")):
