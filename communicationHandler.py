@@ -21,13 +21,29 @@ from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
-#packets recived from topside and sent to ROV
-ROVcmd  = 40
-MANIcmd = 41
-SENSORFlags = 66
-SYS5VFlags = 97
-THR12VFlags = 98
-MANI12VFlags = 99
+#Packets recived from topside and sent to ROV
+ROVCMD  = 40
+MANICMD = 41
+SENSORFLAGS = 66
+SYS5VFLAGS = 97
+THR12VFLAGS = 98
+MANI12VFLAGS = 99
+canParsingDict  = {
+      ROVCMD: int8Parse,
+      MANICMD: int8Parse,
+      SENSORFLAGS: sensorflagsParse,
+      SYS5VFLAGS: fuselightParse,
+      THR12VFLAGS: fuselightParse,
+      MANI12VFLAGS: fuselightParse
+    }
+
+#Functions recived from topside
+CAMERA = 200
+#Actions recived from topside
+TILT = 'tilt'
+START = 'start'
+STOP = 'stop'
+#Function dict placed inside nettcallback method
 
 can_types = {
     "int8"  : "<b",
@@ -61,8 +77,7 @@ def netThread(netHandler, netCallback, flag):
 
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
-  #hbIds = [63, 95 ,125, 126, 127]
-  hbIds = [125]
+  hbIds = [63, 95 ,125, 126, 127]
   while systemFlag['Can']:
     for flag in ucFlags:
       ucFlags[flag] = False
@@ -131,25 +146,12 @@ class ComHandler:
 
   def toggleNet(self):
     if self.status['Net']:
-      #This will stop network thread
       self.status['Net'] = False
     else:
       self.netTrad = threading.Thread(name="Network_thread",target=netThread, daemon=True, args=(self.netHandler, self.netCallback, self.status))
       self.netTrad.start()
 
   def netCallback(self, data: bytes) -> None:
-    CAMERA = 200
-    TILT = 'tilt'
-    START = 'start'
-    STOP = 'stop'
-    canParsingDict  = {
-      ROVcmd: int8Parse,
-      MANIcmd: int8Parse,
-      SENSORFlags: sensorflagsParse,
-      SYS5VFlags: fuselightParse,
-      THR12VFlags: fuselightParse,
-      MANI12VFlags: fuselightParse
-    }
     functionsParsingDict  = {
       CAMERA: {TILT: self.servo,
                START: self.camStart,
@@ -175,7 +177,9 @@ class ComHandler:
                 self.netHandler.send(toJson("Error: Canbus not initialised"))
             elif item[0] in functionsParsingDict:
               if item[1][0] in functionsParsingDict[item[0]]:
-                functionsParsingDict[item[0]][item[1][0]](item[1][1])   
+                functionsParsingDict[item[0]][item[1][0]](item[1][1])
+              else:
+                functionsParsingDict[item[0]](item[1])   
             else: 
               self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing dict'))                            
       except Exception as e:

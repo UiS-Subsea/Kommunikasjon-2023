@@ -7,9 +7,7 @@
     @date   16.03.23 
     @author Thomas Matre
 """
-import can
-import struct
-import json
+import can, struct, json
 
 can_types = {
     "int8": "<b",
