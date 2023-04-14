@@ -27,12 +27,10 @@ class gstreamerPipe(Thread):
       self.sourceID = '1'
     elif self.pipeId == "bottom":
       self.port = '5002'
-      #self.sourceID = '2'
-      self.sourceID = '1'
+      self.sourceID = '2'
     elif self.pipeId == "manipulator":
       self.port = '5003'
-      #self.sourceID = '3'
-      self.sourceID = '2'
+      self.sourceID = '3'
     else:
       self.port = port
     self.pipe = self.createPipe()

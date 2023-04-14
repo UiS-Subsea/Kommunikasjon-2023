@@ -148,7 +148,7 @@ def recieve_forever(conn):
 
 if __name__ == "__main__":
     print(sys.platform)
-    if sys.platform != "win32":
+    if sys.platform == "win32":
         server_conn = Network(is_server=False, bind_addr="0.0.0.0", connect_addr="10.0.0.187")
         # server_conn = Network(is_server=True, bind_addr="127.0.0.1")
         # threading.Thread(target=recieve_forever).start()
@@ -167,44 +167,12 @@ if __name__ == "__main__":
         nw.start()
         while True:
             time.sleep(2)
-            asd = [[296, "bildebehandlingsmodus", 1],[500, "teststring"]]
-            a = input("Click to send message\n")
-            if a == "stop":
-                a = input("What cam do you want to stop?\n")
-                if a == "front":
-                    asd = [[200, {"on": True}]]
-                else:
-                    asd = [[201, {"on": True}]]
-            elif a == "modus":
-                a = input("What cam do you want to change mode on?\n")
-                if a == "back":
-                    a = input("Set mode to what?\n")
-                    asd = [[201, {"bildebehandlingsmodus": int(a)}]]
-                else:
-                    a = input("Set mode to what?\n")
-                    asd = [[200, {"bildebehandlingsmodus": int(a)}]]
-            elif a == 'tilt':
-                a = input("Tilt camera to what angle?\n")
-                asd = [[200, {"tilt": int(a)}]]
-            elif a == 'loop':
-                for _ in range(10):
-                    asd = [70]
-            elif a == 'pic':
-                a = input("Toggle what camera?")
-                asd = [[200, {"camera": int(7)}]]
-            elif a == 'id':
-                a = input("ID\n")
-                asd = [[int(a),{int(15),int(34),int(45),int(466)}]]
-            elif a == 'stich':
-                print('stitch')
-                asd = [[200, {"stitch": int(7)}]]
-            elif a == 'gyro':
-                asd = [[96, 50]]
-            elif a == 'test':
-                asd = [100,]
+            inp = input("Send msg?")
+            if inp == "a":
+                msg = [[100, [1000, -1000, 16000, -16000]]]
+
                 
-                
-            mess = bytes(json.dumps("*"), "utf-8") + bytes(json.dumps(asd), "utf-8") + bytes(json.dumps("*"), "utf-8")
+            mess = bytes(json.dumps("*"), "utf-8") + bytes(json.dumps(msg), "utf-8") + bytes(json.dumps("*"), "utf-8")
             client_conn.send(mess)
             #client_conn.send(bytes('*{"can": [(0, 99)]}*', "utf-8"))
         # send_thread = threading.Thread(target=lambda: send_forever(client_conn))

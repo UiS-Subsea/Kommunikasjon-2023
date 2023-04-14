@@ -21,29 +21,6 @@ from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
-#Packets recived from topside and sent to ROV
-ROVCMD  = 40
-MANICMD = 41
-SENSORFLAGS = 66
-SYS5VFLAGS = 97
-THR12VFLAGS = 98
-MANI12VFLAGS = 99
-canParsingDict  = {
-      ROVCMD: int8Parse,
-      MANICMD: int8Parse,
-      SENSORFLAGS: sensorflagsParse,
-      SYS5VFLAGS: fuselightParse,
-      THR12VFLAGS: fuselightParse,
-      MANI12VFLAGS: fuselightParse
-    }
-
-#Functions recived from topside
-CAMERA = 200
-#Actions recived from topside
-TILT = 'tilt'
-START = 'start'
-STOP = 'stop'
-#Function dict placed inside nettcallback method
 
 can_types = {
     "int8"  : "<b",
@@ -77,7 +54,8 @@ def netThread(netHandler, netCallback, flag):
 
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
-  hbIds = [63, 95 ,125, 126, 127]
+  #hbIds = [63, 95 ,125, 126, 127]
+  hbIds = [125]
   while systemFlag['Can']:
     for flag in ucFlags:
       ucFlags[flag] = False
@@ -124,9 +102,13 @@ class ComHandler:
                       'Bottom': False, 
                       'Manipulator': False
                      }
-    self.canFilters= [{"can_id": 0x80, 
-                       "can_mask": 0xE0, 
+    self.canFilters= [{"can_id": 0x60, 
+                       "can_mask": 0xF8, 
                        "extended": False
+                      }]
+    self.canFilters= [{"can_id": 0x00, 
+                       "can_mask": 0x00, 
+                       "extended": False 
                       }]
     self.canInit()
     self.connectIp = ip
@@ -146,18 +128,18 @@ class ComHandler:
 
   def toggleNet(self):
     if self.status['Net']:
+      #This will stop network thread
       self.status['Net'] = False
     else:
       self.netTrad = threading.Thread(name="Network_thread",target=netThread, daemon=True, args=(self.netHandler, self.netCallback, self.status))
       self.netTrad.start()
 
   def netCallback(self, data: bytes) -> None:
-    functionsParsingDict  = {
-      CAMERA: {TILT: self.servo.newAngle,
-               START: self.camStart,
-               STOP: self.camStop
-               }
-            }
+    int8Ids   = [40, 41]
+    uint8Ids  = []
+    int16Ids  = [100]
+    uint16Ids = []
+    fuselightIds = [97, 98 ,99]
     data:str = bytes.decode(data, 'utf-8')
     for message in data.split(json.dumps("*")):
       try:
@@ -168,19 +150,52 @@ class ComHandler:
         else:
           message = json.loads(message)
           for item in message:
-            if item[0] in canParsingDict:
+            if 32 <= item[0] <= 159:
               if self.status['Can']:
-                  msg = canParsingDict[item[0]](item)
+                if item[0] in int8Ids:
+                  msg = int8Parse(item)
                   self.sendPacket(msg)
+                elif item[0] in uint8Ids:
+                  msg = uint8Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in int16Ids:
+                  msg = int16Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in uint16Ids:
+                  msg = uint16Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in fuselightIds:
+                  msg = fuselightParse(msg)
+                  self.sendPacket(msg)
+                elif item[0] == 66:
+                  msg = sensorflagsParse(item)
+                  self.sendPacket(msg)
+                else: 
+                  self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing list'))
               else:
                 self.netHandler.send(toJson("Error: Canbus not initialised"))
-            elif item[0] in functionsParsingDict:
-              if item[1][0] in functionsParsingDict[item[0]]:
-                functionsParsingDict[item[0]][item[1][0]](item[1][1])
-              else:
-                functionsParsingDict[item[0]](item[1])   
-            else: 
-              self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing dict'))                            
+            elif item[0] == 200:
+              if item[1] == 'tilt':
+                if item[2] == 1:
+                  if not self.camStatus['S1']:
+                    self.camStart('stereo1')
+                  elif self.camStatus['S1']:
+                    self.camStop('stereo1')
+                elif item[2] == 2:
+                  if not self.camStatus['S2']:
+                    self.camStart('stereo2')
+                  elif self.camStatus['S2']:
+                    self.camStop('stereo2')
+                elif item[2] == 3:
+                  if not self.camStatus['Bottom']:
+                    self.camStart('bottom')
+                  elif self.camStatus['Bottom']:
+                    self.camStop('bottom')                        
+                elif item[2] == 4:
+                  if not self.camStatus['Manipulator']:
+                    self.camStart('manipulator')
+                  elif self.camStatus['Manupulator']:
+                    self.camStop('manipulator')                                
       except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
@@ -221,10 +236,6 @@ class ComHandler:
     self.i2cThread.start()
 
   def camInit(self):
-    try:
-      self.servo = ServoPWM()
-    finally:
-      self.servo.cleanup()
     Gst.init([])
     self.stereo1Pipe = gstreamerPipe(pipeId="stereo1", port="5000")
     self.stereo1Thread = threading.Thread(target=self.stereo1Pipe.run)
