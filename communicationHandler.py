@@ -17,7 +17,7 @@ from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild
 from functions.fPacketDecode import packetDecode
-from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse
+from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
@@ -139,6 +139,7 @@ class ComHandler:
     uint8Ids  = []
     int16Ids  = [100]
     uint16Ids = []
+    fuselightIds = [97, 98 ,99]
     data:str = bytes.decode(data, 'utf-8')
     for message in data.split(json.dumps("*")):
       try:
@@ -162,6 +163,12 @@ class ComHandler:
                   self.sendPacket(msg)
                 elif item[0] in uint16Ids:
                   msg = uint16Parse(item)
+                  self.sendPacket(msg)
+                elif item[0] in fuselightIds:
+                  msg = fuselightParse(msg)
+                  self.sendPacket(msg)
+                elif item[0] == 66:
+                  msg = sensorflagsParse(item)
                   self.sendPacket(msg)
                 else: 
                   self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing list'))
