@@ -76,7 +76,8 @@ def uint64Parse(item):
 #custom packs
 def fuselightParse(item):
   msg = [item[0],
-        ['unit8' ,int.from_bytes(bytearray(item[1][0]), byteorder='little', signed=False)]
+       # ['unit8' ,int.from_bytes(bytearray(item[1][0]), byteorder='little', signed=False)]
+        ['uint8', int(item[1][0])],        
         ['uint8', int(item[1][1])], 
         ['uint8', int(item[1][2])], 
         ['uint8', int(item[1][3])],
@@ -87,7 +88,7 @@ def fuselightParse(item):
   return msg
 def sensorflagsParse(item):
   msg = [item[0],
-        ['unit8' ,int.from_bytes(bytearray(item[1][0]), byteorder='little', signed=False)]
+        ['unit8', int(item[1][0])],
         ['uint8', int(item[1][1])], 
         ['uint8', int(item[1][2])], 
         ['uint8', int(item[1][3])],
