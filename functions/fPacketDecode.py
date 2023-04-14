@@ -13,6 +13,7 @@ from functions.fPackedDecodeParsing import canint16Parse, canint8Parse, canSenso
 
 #Packets recived from ROV over canbus to be parsed and sent to TOPSIDE
 THRUSTPAADRAG = 129
+REGTEMP       = 130
 AKSELERASJON  = 135
 GYRO          = 136
 MAGNETOMETER  = 137
@@ -27,6 +28,7 @@ HB5V          = 159
 
 canReciveDict = {
     THRUSTPAADRAG:  canint8Parse,
+    REGTEMP:        canint16Parse,
     AKSELERASJON:   canint16Parse,
     GYRO:           canint16Parse,
     MAGNETOMETER:   canint16Parse,
@@ -47,8 +49,8 @@ def packetDecode(msg, ucFlags):
     if canID in canReciveDict:
       jsonDict = canReciveDict[canID](canID, dataByte, ucFlags)
     else:
-      print(f"CanID: {canID} recived from ROV system not in parsing dict")
-      jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict"}
+      print(f"CanID: {canID} recived from ROV system not in parsing dict msg: {msg}")
+      jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict with"}
   except TypeError as e:
      jsonDict = {"Error": e}
   return toJson(jsonDict)

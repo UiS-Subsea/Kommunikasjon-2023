@@ -142,7 +142,7 @@ def recieve_forever(conn):
             data:str = bytes.decode(data, "utf-8")
             if "heartbeat" not in data:
                 #if "ERROR" in data:
-                #print(data)
+                print(data)
                 pass
 
 

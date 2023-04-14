@@ -124,8 +124,8 @@ class ComHandler:
                       'Bottom': False, 
                       'Manipulator': False
                      }
-    self.canFilters= [{"can_id": 0x60, 
-                       "can_mask": 0xF8, 
+    self.canFilters= [{"can_id": 0x80, 
+                       "can_mask": 0xE0, 
                        "extended": False
                       }]
     self.canInit()
@@ -153,12 +153,11 @@ class ComHandler:
 
   def netCallback(self, data: bytes) -> None:
     functionsParsingDict  = {
-      CAMERA: {TILT: self.servo,
+      CAMERA: {TILT: self.servo.newAngle,
                START: self.camStart,
                STOP: self.camStop
                }
-
-    }
+            }
     data:str = bytes.decode(data, 'utf-8')
     for message in data.split(json.dumps("*")):
       try:
