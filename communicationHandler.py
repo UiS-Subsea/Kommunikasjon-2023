@@ -9,7 +9,7 @@
 """
 
 #todo test if all datatypes is converted correctly
-import can, struct, time, json, threading, sys, os, subprocess, gi
+import can, time, json, threading, gi
 from drivers.network_handler import Network 
 from drivers.STTS75_driver import STTS75; 
 from drivers.camPWM import ServoPWM; 
@@ -45,19 +45,6 @@ START = 'start'
 STOP = 'stop'
 #Function dict placed inside nettcallback method
 
-can_types = {
-    "int8"  : "<b",
-    "uint8" : "<B",
-    "int16" : "<h",
-    "uint16": "<H",
-    "int32" : "<i",
-    "uint32": "<I",
-    "int64" : "<q",
-    "uint64": "<Q",
-    "float" : "<f"
-            }
-
-
 # Reads data from network port
 def netThread(netHandler, netCallback, flag):
   print("Server started\n")
@@ -75,6 +62,7 @@ def netThread(netHandler, netCallback, flag):
   netHandler.exit()
   print(f'Network thread stopped')
 
+#Sends heartbeat and alarm if no response in 1sec.
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
   hbIds = [63, 95 ,125, 126, 127]
@@ -92,6 +80,7 @@ def hbThread(netHandler, canSend, systemFlag, ucFlags):
         time.sleep(0.2)
   print("Heartbeat thread stopped")
 
+#Pulls temp from STTS75 every second.
 def i2cThread(netHandler, STTS75, systemFlag):
   print("i2c Thread started")
   while systemFlag['Net']:
