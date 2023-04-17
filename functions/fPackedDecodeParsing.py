@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """
-    @file   commmunicationHandler.py
+    @file   fPacketDecodeParsing.py
     
     @brief  Decode CAN messages and parse to TCP messages
     @date   10.03.23 

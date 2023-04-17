@@ -102,9 +102,13 @@ class ComHandler:
     self.canFilters= [{'can_id': 0x80, 'can_mask': 0xE0, 'extended': False}]
     self.connectIp = ip
     self.connectPort = port
+    try:
+      self.servo = ServoPWM()
+    finally:
+      self.servo.cleanup()
     self.canInit()
-    self.camInit()
     self.netInit()
+    self.camInit()
     self.heartBeat()
     self.i2cInit()
 
@@ -112,7 +116,7 @@ class ComHandler:
     self.bus = can.Bus(interface = self.canifaceType, channel = self.canifaceName, receive_own_messages = False, fd = False)
     self.bus.set_filters(self.canFilters)
     self.status['Can'] = True
-    self.notifier = can.Notifier(self.bus, [self.readPacket])
+    self.notifier = can.Notifier(self.bus, [self.canCallback])
 
   def netInit(self):
     self.netHandler = Network(is_server=True, 
@@ -170,13 +174,13 @@ class ComHandler:
     except Exception as e:
       print(f'Feilkode i sendPacket, feilmelding: {e}\n\t{packet}')
 
-  def readPacket(self, can):
+  def canCallback(self, can):
     self.bus.socket.settimeout(0)
     try:
       msg = packetDecode(can, self.uCstatus)
       self.netHandler.send(msg)
     except Exception as e:
-      print(f'Feilkode i readPacket, feilmelding: {e}\n\t{can.data}')
+      print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
         
   def heartBeat(self):
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
@@ -193,10 +197,6 @@ class ComHandler:
   #  self.PWMThread.start()
 
   def camInit(self):
-    try:
-      self.servo = ServoPWM()
-    finally:
-      self.servo.cleanup()
     Gst.init([])
     self.stereo1Pipe = gstreamerPipe(pipeId="stereo1", port="5000")
     self.stereo1Thread = threading.Thread(target=self.stereo1Pipe.run)

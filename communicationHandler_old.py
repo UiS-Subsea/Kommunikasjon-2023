@@ -54,9 +54,8 @@ def netThread(netHandler, netCallback, flag):
 
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
-  #hbIds = [63, 95 ,125, 126, 127]
-  hbIds = [125]
-  while systemFlag['Can']:
+  hbIds = [63, 95 ,125, 126, 127]
+  while systemFlag['Can'] and systemFlag['Net']:
     for flag in ucFlags:
       ucFlags[flag] = False
     for id in hbIds:
