@@ -57,7 +57,7 @@ def netThread(netHandler, netCallback, flag):
       if msg == b"" or msg is None:
         continue
       else:
-        netCallback(msg, function)
+        netCallback(msg)
     except ValueError as e:
       print(f'Feilkode i network thread feilmelding: {e}\n\t{msg}')
       break

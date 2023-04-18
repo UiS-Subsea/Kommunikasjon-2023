@@ -85,6 +85,7 @@ def fuselightParse(item):
         ['uint8', int(item[1][5])],
         ['uint8', int(item[1][6])],
         ['uint8', int(item[1][7])]]
+  print(f"Sending fuse and light flags{msg}")
   return msg
 def sensorflagsParse(item):
   msg = [item[0],
@@ -96,4 +97,5 @@ def sensorflagsParse(item):
         ['uint8', int(item[1][5])],
         ['uint8', int(item[1][6])],
         ['uint8', int(item[1][7])]]
+  print(f"Sending Sensorflags{msg}")
   return msg
