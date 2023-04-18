@@ -20,6 +20,9 @@ MAGNETOMETER  = 137
 VINKLER       = 138
 TEMPDYBDE     = 139
 SENSORERROR   = 140
+DATA12VMAN    = 150
+DATA12VTHR    = 151
+DATA5V        = 152
 HBREG         = 155
 HBSENSOR      = 156
 HB12VMAN      = 157
@@ -35,6 +38,9 @@ canReciveDict = {
     VINKLER:        canint16Parse,
     TEMPDYBDE:      canint16Parse,
     SENSORERROR:    canSensorAlarmsParse,
+    DATA12VMAN:     canint16Parse,
+    DATA12VTHR:     canint16Parse,
+    DATA5V:         canint16Parse,
     HBREG:          canHBParse,
     HBSENSOR:       canHBParse,
     HB12VMAN:       canHBParse,
@@ -54,3 +60,4 @@ def packetDecode(msg, ucFlags):
   except TypeError as e:
      jsonDict = {"Error": e}
   return toJson(jsonDict)
+

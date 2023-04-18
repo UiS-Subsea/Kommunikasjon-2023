@@ -26,7 +26,7 @@ from gi.repository import Gst, GLib
 ROVCMD        = 40
 MANICMD       = 41
 SENSORFLAGS   = 66
-SYS5VFLAGS    = 97
+SYS5VFLAGS    = 97 
 THR12VFLAGS   = 98
 MANI12VFLAGS  = 99
 canParsingDict  = {
@@ -160,7 +160,8 @@ class ComHandler:
               if item[1][0] in functionsParsingDict[item[0]]:
                 functionsParsingDict[item[0]][item[1][0]](item[1][1])
               else:
-                functionsParsingDict[item[0]](item[1])   
+                print(f"function: {item[0]}, action: {item[1][0]}, with value: {item[1][1]} failed")
+                #functionsParsingDict[item[0]](item[1])   
             else: 
               self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing dict'))                            
       except Exception as e:

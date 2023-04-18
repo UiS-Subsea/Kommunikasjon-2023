@@ -170,6 +170,13 @@ if __name__ == "__main__":
             inp = input("Send msg?")
             if inp == "a":
                 msg = [[100, [1000, -1000, 16000, -16000]]]
+            elif inp == "b":
+                msg = [[66, [2, 0, 0, 0, 0, 0, 0, 0]]]
+            elif inp == "tilt":
+                inpval = input("What tilt value:")
+                msg = [[200, ["tilt", inpval]]]
+            else:
+                msg = [[100, [1000, -1000, 16000, -16000]]]
 
                 
             mess = bytes(json.dumps("*"), "utf-8") + bytes(json.dumps(msg), "utf-8") + bytes(json.dumps("*"), "utf-8")
