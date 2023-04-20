@@ -18,13 +18,14 @@ from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild
 from functions.fPacketDecode import packetDecode
-from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse
+from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
 #Packets recived from topside and sent to ROV
 ROVCMD        = 40
 MANICMD       = 41
+REGPARAM      = 42
 SENSORFLAGS   = 66
 SYS5VFLAGS    = 97 
 THR12VFLAGS   = 98
@@ -32,6 +33,7 @@ MANI12VFLAGS  = 99
 canParsingDict  = {
       ROVCMD:       int8Parse,
       MANICMD:      int8Parse,
+      REGPARAM:     regParamsParse,
       SENSORFLAGS:  sensorflagsParse,
       SYS5VFLAGS:   fuselightParse,
       THR12VFLAGS:  fuselightParse,
@@ -45,7 +47,6 @@ TILT = 'tilt'
 START = 'start'
 STOP = 'stop'
 #Function dict placed inside nettcallback method
-
 
 # Reads data from network port
 def netThread(netHandler, netCallback, flag):
@@ -87,7 +88,7 @@ def i2cThread(netHandler, STTS75, systemFlag):
   print("i2c Thread started")
   while systemFlag['Net']:
     temp = STTS75.read_temp()
-    msg = toJson({"Temp on Jetson": temp})
+    msg = toJson({'145': (temp)})
     netHandler.send(msg)
     time.sleep(2)
   print("i2c Thread stopped")
@@ -102,10 +103,7 @@ class ComHandler:
     self.canFilters= [{'can_id': 0x80, 'can_mask': 0xE0, 'extended': False}]
     self.connectIp = ip
     self.connectPort = port
-    try:
-      self.servo = ServoPWM()
-    finally:
-      self.servo.cleanup()
+    self.servo = ServoPWM(pin=32, freq=50, startDT=7.5)
     self.canInit()
     self.netInit()
     self.camInit()
@@ -119,9 +117,7 @@ class ComHandler:
     self.notifier = can.Notifier(self.bus, [self.canCallback])
 
   def netInit(self):
-    self.netHandler = Network(is_server=True, 
-                              bind_addr=self.connectIp,
-                              port     =self.connectPort)
+    self.netHandler = Network(is_server = True, bind_addr = self.connectIp, port = self.connectPort)
     while self.netHandler.waiting_for_conn:
       time.sleep(1)
     self.toggleNet()
@@ -155,19 +151,25 @@ class ComHandler:
                   msg = canParsingDict[item[0]](item)
                   self.sendPacket(msg)
               else:
-                self.netHandler.send(toJson("Error: Canbus not initialised"))
+                self.sendTcpPacket("Error: Canbus not initialised")
             elif item[0] in functionsParsingDict:
               if item[1][0] in functionsParsingDict[item[0]]:
+                print(f"function: {item[0]}, action: {item[1][0]}, with value: {item[1][1]} Activated")
                 functionsParsingDict[item[0]][item[1][0]](item[1][1])
               else:
                 print(f"function: {item[0]}, action: {item[1][0]}, with value: {item[1][1]} failed")
                 #functionsParsingDict[item[0]](item[1])   
             else: 
-              self.netHandler.send(toJson(f'Error: canId: {item[0]} not in Parsing dict'))                            
+              self.sendTcpPacket(f'Error: canId: {item[0]} not in Parsing dict')                        
       except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
-  def sendPacket(self, tag):
+  def sendTcpPacket(self, msg):
+    self.msg = toJson(msg)
+    if self.status['Net']:
+      self.netHandler.send(self.msg)
+      
+  def sendCanPacket(self, tag):
     packet = packetBuild(tag)
     assert self.bus is not None
     try:
@@ -179,7 +181,7 @@ class ComHandler:
     self.bus.socket.settimeout(0)
     try:
       msg = packetDecode(can, self.uCstatus)
-      self.netHandler.send(msg)
+      self.sendTcpPacket(msg)
     except Exception as e:
       print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
         
@@ -230,7 +232,7 @@ class ComHandler:
     elif pipeId == 'manipulator' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
       self.manipulatorPipe.runPipe()
       self.camStatus['manipulator'] = True
-    self.netHandler.send(toJson(f"Camera: {pipeId} started"))
+    self.sendTcpPacket(f"Camera: {pipeId} started")
      
   def camStop(self, pipeId):
     if pipeId == 'stereo1':
@@ -245,10 +247,10 @@ class ComHandler:
     elif pipeId == 'manipulator':
       self.manipulatorPipe.stopPipe()
       self.camStatus['manipulator'] = False
-    self.netHandler.send(toJson(f"Camera: {pipeId} stopped"))
+    self.sendTcpPacket(f"Camera: {pipeId} stopped")
      
 
 if __name__ == "__main__":
   c = ComHandler()
   while True:
-    time.sleep(1)
+    pass

@@ -38,6 +38,7 @@ class ServoPWM:
         self.PWM.start(self.startDT)
     
     def newAngle(self, angle:float):
+        angle = float(angle)
         if 0 <= angle <= 180:
             value = scale2x(X0=0, X1=180, Y0=5, Y1=10, inValue=angle)
         else:

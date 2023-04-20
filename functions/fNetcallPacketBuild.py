@@ -8,8 +8,6 @@
     @author Thomas Matre
 """
 
-import json
-
 #standard packs
 def int8Parse(item):
   msg = [item[0], 
@@ -76,7 +74,6 @@ def uint64Parse(item):
 #custom packs
 def fuselightParse(item):
   msg = [item[0],
-       # ['unit8' ,int.from_bytes(bytearray(item[1][0]), byteorder='little', signed=False)]
         ['uint8', int(item[1][0])],        
         ['uint8', int(item[1][1])], 
         ['uint8', int(item[1][2])], 
@@ -85,7 +82,7 @@ def fuselightParse(item):
         ['uint8', int(item[1][5])],
         ['uint8', int(item[1][6])],
         ['uint8', int(item[1][7])]]
-  print(f"Sending fuse and light flags{msg}")
+  print(f"Sending fuse and light flags{item[1]}")
   return msg
 def sensorflagsParse(item):
   msg = [item[0],
@@ -97,5 +94,11 @@ def sensorflagsParse(item):
         ['uint8', int(item[1][5])],
         ['uint8', int(item[1][6])],
         ['uint8', int(item[1][7])]]
-  print(f"Sending Sensorflags{msg}")
+  print(f"Sending Sensorflags:{item[1]}")
   return msg
+
+def regParamsParse(item):
+  msg = [item[0],
+        ['int32', int(item[1][0])],
+        ['float', float(item[1][1])]]
+  print(f"Sending regParmas ID:{int(item[1][0])} Value:{float(item[1][1])}")

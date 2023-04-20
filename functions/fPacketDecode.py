@@ -9,7 +9,7 @@
 """
 
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
-from functions.fPackedDecodeParsing import canint16Parse, canint8Parse, canSensorAlarmsParse, canuint16Parse, canuint8Parse, canHBParse
+from functions.fPackedDecodeParsing import canint16Parse, canint8Parse, canSensorAlarmsParse, canuint16Parse, canuint8Parse, canHBParse, can12VParse
 
 #Packets recived from ROV over canbus to be parsed and sent to TOPSIDE
 THRUSTPAADRAG = 129
@@ -20,8 +20,8 @@ MAGNETOMETER  = 137
 VINKLER       = 138
 TEMPDYBDE     = 139
 SENSORERROR   = 140
-DATA12VMAN    = 150
-DATA12VTHR    = 151
+DATA12VRIGHT  = 150
+DATA12VLEFT   = 151
 DATA5V        = 152
 HBREG         = 155
 HBSENSOR      = 156
@@ -38,8 +38,8 @@ canReciveDict = {
     VINKLER:        canint16Parse,
     TEMPDYBDE:      canint16Parse,
     SENSORERROR:    canSensorAlarmsParse,
-    DATA12VMAN:     canint16Parse,
-    DATA12VTHR:     canint16Parse,
+    DATA12VRIGHT:   can12VParse,
+    DATA12VLEFT:    can12VParse,
     DATA5V:         canint16Parse,
     HBREG:          canHBParse,
     HBSENSOR:       canHBParse,
@@ -59,5 +59,5 @@ def packetDecode(msg, ucFlags):
       jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict with"}
   except TypeError as e:
      jsonDict = {"Error": e}
-  return toJson(jsonDict)
+  return jsonDict
 
