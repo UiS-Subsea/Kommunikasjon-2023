@@ -69,7 +69,7 @@ def netThread(netHandler, netCallback, flag):
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
   print("Heartbeat thread started")
   hbIds = [63, 95 ,125, 126, 127]
-  while systemFlag['Can']:
+  while systemFlag['Can'] and systemFlag['Net']:
     for flag in ucFlags:
       ucFlags[flag] = False
     for id in hbIds:
@@ -105,8 +105,8 @@ class ComHandler:
     self.connectPort = port
     self.servo = ServoPWM(pin=32, freq=50, startDT=7.5)
     self.canInit()
-    self.netInit()
     self.camInit()
+    self.netInit()
     self.heartBeat()
     self.i2cInit()
 
@@ -149,7 +149,7 @@ class ComHandler:
             if item[0] in canParsingDict:
               if self.status['Can']:
                   msg = canParsingDict[item[0]](item)
-                  self.sendPacket(msg)
+                  self.sendCanPacket(msg)
               else:
                 self.sendTcpPacket("Error: Canbus not initialised")
             elif item[0] in functionsParsingDict:
@@ -175,18 +175,19 @@ class ComHandler:
     try:
       self.bus.send(packet)
     except Exception as e:
-      print(f'Feilkode i sendPacket, feilmelding: {e}\n\t{packet}')
+      print(f'Feilkode i sendCanPacket, feilmelding: {e}\n\t{packet}')
 
   def canCallback(self, can):
-    self.bus.socket.settimeout(0)
-    try:
-      msg = packetDecode(can, self.uCstatus)
-      self.sendTcpPacket(msg)
-    except Exception as e:
-      print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
+    if self.status['Can'] and self.status['Net']:
+      self.bus.socket.settimeout(0)
+      try:
+        msg = packetDecode(can, self.uCstatus)
+        self.sendTcpPacket(msg)
+      except Exception as e:
+        print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
         
   def heartBeat(self):
-    self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendPacket, self.status, self.uCstatus))
+    self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendCanPacket, self.status, self.uCstatus))
     self.heartBeatThread.start()
   
   def i2cInit(self):

@@ -19,6 +19,7 @@ def int8Parse(item):
         ['int8', int(item[1][5])],
         ['int8', int(item[1][6])],
         ['int8', int(item[1][7])]]
+  print(item)
   return msg
 
 def uint8Parse(item):
@@ -31,6 +32,7 @@ def uint8Parse(item):
         ['uint8', int(item[1][5])],
         ['uint8', int(item[1][6])],
         ['uint8', int(item[1][7])]]
+  print(item)
   return msg    
 
 def int16Parse(item):
