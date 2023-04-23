@@ -104,3 +104,4 @@ def regParamsParse(item):
         ['int32', int(item[1][0])],
         ['float', float(item[1][1])]]
   print(f"Sending regParmas ID:{int(item[1][0])} Value:{float(item[1][1])}")
+  return msg
