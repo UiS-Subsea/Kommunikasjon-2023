@@ -23,16 +23,22 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
 #Packets recived from topside and sent to ROV
-ROVCMD        = 40
-MANICMD       = 41
+REGCONTROL    = 32
+ROVCMD        = 33
+MANICMD       = 34
+ROVCMDSPARE   = 40
+MANICMDSPARE  = 41
 REGPARAM      = 42
 SENSORFLAGS   = 66
 SYS5VFLAGS    = 97 
 THR12VFLAGS   = 98
 MANI12VFLAGS  = 99
 canParsingDict  = {
+      REGCONTROL:   uint8Parse,
       ROVCMD:       int8Parse,
       MANICMD:      int8Parse,
+      ROVCMDSPARE:  int8Parse,
+      MANICMDSPARE: int8Parse,
       REGPARAM:     regParamsParse,
       SENSORFLAGS:  sensorflagsParse,
       SYS5VFLAGS:   fuselightParse,

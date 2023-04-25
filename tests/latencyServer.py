@@ -167,4 +167,4 @@ class ComHandler:
 if __name__ == "__main__":
   c = ComHandler()
   while True:
-    time.sleep(0.1)
+    pass

@@ -40,7 +40,7 @@ def netHandler(ip, port, meld):
       recmeld = network_socket.recv(1024)
       data:str = bytes.decode(recmeld, 'utf-8')
       for message in data.split(json.dumps("*")):
-        if "139" in message:
+        if meld == message:
           tid = time.time_ns()-start
           time_list.append(tid)           
     except Exception as e:
