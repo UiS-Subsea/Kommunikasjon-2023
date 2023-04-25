@@ -17,8 +17,8 @@ from drivers.camPWM import ServoPWM;
 from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild
-from functions.fPacketDecode import packetDecode
 from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse
+from functions.fCancallParsing import canint16Parse, canint8Parse, canSensorAlarmsParse, canuint16Parse, canuint8Parse, canHBParse, can12VParse
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 
@@ -45,6 +45,43 @@ canParsingDict  = {
       THR12VFLAGS:  fuselightParse,
       MANI12VFLAGS: fuselightParse
     }
+
+#Packets recived from ROV over canbus to be parsed and sent to TOPSIDE
+THRUSTPAADRAG = 129
+REGTEMP       = 130
+AKSELERASJON  = 135
+GYRO          = 136
+MAGNETOMETER  = 137
+VINKLER       = 138
+TEMPDYBDE     = 139
+SENSORERROR   = 140
+DATA12VRIGHT  = 150
+DATA12VLEFT   = 151
+DATA5V        = 152
+HBREG         = 155
+HBSENSOR      = 156
+HB12VMAN      = 157
+HB12VTHR      = 158
+HB5V          = 159
+
+canReciveDict = {
+    THRUSTPAADRAG:  canint8Parse,
+    REGTEMP:        canint16Parse,
+    AKSELERASJON:   canint16Parse,
+    GYRO:           canint16Parse,
+    MAGNETOMETER:   canint16Parse,
+    VINKLER:        canint16Parse,
+    TEMPDYBDE:      canint16Parse,
+    SENSORERROR:    canSensorAlarmsParse,
+    DATA12VRIGHT:   can12VParse,
+    DATA12VLEFT:    can12VParse,
+    DATA5V:         canint16Parse,
+    HBREG:          canHBParse,
+    HBSENSOR:       canHBParse,
+    HB12VMAN:       canHBParse,
+    HB12VTHR:       canHBParse,
+    HB5V:           canHBParse
+  }
 
 #Functions recived from topside
 CAMERA = 200
@@ -183,12 +220,21 @@ class ComHandler:
     except Exception as e:
       print(f'Feilkode i sendCanPacket, feilmelding: {e}\n\t{packet}')
 
-  def canCallback(self, can):
+  def canCallback(self, msg):
     if self.status['Can'] and self.status['Net']:
       self.bus.socket.settimeout(0)
       try:
-        msg = packetDecode(can, self.uCstatus)
-        self.sendTcpPacket(msg)
+        canID = msg.arbitration_id
+        dataByte = msg.data
+        try:
+          if canID in canReciveDict:
+            jsonDict = canReciveDict[canID](canID, dataByte, self.ucFlags)
+          else:
+            print(f"CanID: {canID} recived from ROV system not in parsing dict msg: {msg}")
+            jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict with"}
+        except TypeError as e:
+            jsonDict = {"Error": e}      
+        self.sendTcpPacket(jsonDict)
       except Exception as e:
         print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
         
