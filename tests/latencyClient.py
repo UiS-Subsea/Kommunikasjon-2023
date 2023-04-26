@@ -18,7 +18,7 @@ def netHandler(ip, port, meld):
   time_list = []
   time_listms = []
   message_list = []
-  NoOfPacks = 2000
+  NoOfPacks = 100
   try:
     network_socket.connect((ip, port))
     print(f"Connected to IP:{ip} with PORT:{port}")

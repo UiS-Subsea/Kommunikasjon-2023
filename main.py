@@ -17,7 +17,7 @@ from drivers.camPWM import ServoPWM;
 from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild
-from functions.fNetcallPacketBuild import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse
+from functions.fNetcallParsing import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse
 from functions.fCancallParsing import canint16Parse, canint8Parse, canSensorAlarmsParse, canuint16Parse, canuint8Parse, canHBParse, can12VParse
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
@@ -33,7 +33,7 @@ SENSORFLAGS   = 66
 SYS5VFLAGS    = 97 
 THR12VFLAGS   = 98
 MANI12VFLAGS  = 99
-canParsingDict  = {
+canSendDict  = {
       REGCONTROL:   uint8Parse,
       ROVCMD:       int8Parse,
       MANICMD:      int8Parse,
@@ -136,6 +136,7 @@ def i2cThread(netHandler, STTS75, systemFlag):
     time.sleep(2)
   print("i2c Thread stopped")
 
+#Class for network controller
 class ComHandler:
   def __init__(self, ip:str='0.0.0.0', port:int=6900, canifaceType:str='socketcan', canifaceName:str='can0') -> None:
     self.canifaceType  = canifaceType
@@ -189,9 +190,9 @@ class ComHandler:
         else:
           message = json.loads(message)
           for item in message:
-            if item[0] in canParsingDict:
+            if item[0] in canSendDict:
               if self.status['Can']:
-                  msg = canParsingDict[item[0]](item)
+                  msg = canSendDict[item[0]](item)
                   self.sendCanPacket(msg)
               else:
                 self.sendTcpPacket("Error: Canbus not initialised")
@@ -203,7 +204,7 @@ class ComHandler:
                 print(f"function: {item[0]}, action: {item[1][0]}, with value: {item[1][1]} failed")
                 #functionsParsingDict[item[0]](item[1])   
             else: 
-              self.sendTcpPacket(f'Error: canId: {item[0]} not in Parsing dict')                        
+              self.sendTcpPacket(f'Error: canId: {item[0]} not mapped')                        
       except Exception as e:
             print(f'Feilkode i netCallback, feilmelding: {e}\n\t{message}')
 
@@ -228,7 +229,7 @@ class ComHandler:
         dataByte = msg.data
         try:
           if canID in canReciveDict:
-            jsonDict = canReciveDict[canID](canID, dataByte, self.ucFlags)
+            jsonDict = canReciveDict[canID](canID, dataByte, self.uCstatus)
           else:
             print(f"CanID: {canID} recived from ROV system not in parsing dict msg: {msg}")
             jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict with"}
@@ -236,7 +237,7 @@ class ComHandler:
             jsonDict = {"Error": e}      
         self.sendTcpPacket(jsonDict)
       except Exception as e:
-        print(f'Feilkode i canCallback, feilmelding: {e}\n\t{can.data}')
+        print(f'Feilkode i canCallback, feilmelding: {e}\n\t{dataByte}')
         
   def heartBeat(self):
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendCanPacket, self.status, self.uCstatus))
