@@ -17,7 +17,7 @@ from drivers.camPWM import ServoPWM;
 from drivers.camHandler import gstreamerPipe
 from functions.fFormating import getBit, getByte, getNum, setBit, toJson
 from functions.fPacketBuild import packetBuild
-from functions.fNetcallParsing import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse
+from functions.fNetcallParsing import int8Parse, int16Parse, int32Parse, int64Parse, uint8Parse, uint16Parse, uint32Parse, uint64Parse, fuselightParse, sensorflagsParse, regParamsParse, regflagsParse
 from functions.fCancallParsing import canint16Parse, canint8Parse, canSensorAlarmsParse, canuint16Parse, canuint8Parse, canHBParse, can12VParse
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
@@ -34,7 +34,7 @@ SYS5VFLAGS    = 97
 THR12VFLAGS   = 98
 MANI12VFLAGS  = 99
 canSendDict  = {
-      REGCONTROL:   uint8Parse,
+      REGCONTROL:   regflagsParse,
       ROVCMD:       int8Parse,
       MANICMD:      int8Parse,
       ROVCMDSPARE:  int8Parse,

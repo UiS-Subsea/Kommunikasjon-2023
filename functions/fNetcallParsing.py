@@ -97,6 +97,19 @@ def sensorflagsParse(item):
   print(f"Sending Sensorflags:{item[1]}")
   return msg
 
+def regflagsParse(item):
+  msg = [item[0],
+        ['uint8', int(item[1][0])],
+        ['uint8', int(item[1][1])], 
+        ['uint8', int(item[1][2])], 
+        ['uint8', int(item[1][3])],
+        ['uint8', int(item[1][4])],
+        ['uint8', int(item[1][5])],
+        ['uint8', int(item[1][6])],
+        ['uint8', int(item[1][7])]]
+  print(f"Sending Regflags:{item[1]}")
+  return msg
+
 def regParamsParse(item):
   msg = [item[0],
         ['int32', int(item[1][0])],
