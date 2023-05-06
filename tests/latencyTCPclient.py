@@ -18,7 +18,7 @@ def netHandler(ip, port, meld):
   time_list = []
   time_listms = []
   message_list = []
-  NoOfPacks = 100
+  NoOfPacks = 5000
   try:
     network_socket.connect((ip, port))
     print(f"Connected to IP:{ip} with PORT:{port}")
@@ -30,38 +30,35 @@ def netHandler(ip, port, meld):
     print(e)
     print("Could not connect to network")
     exit()
-  #ping msg
-  network_socket.sendall(meld)
-  recmeld = network_socket.recv(1024)
   for __ in range(NoOfPacks):
-    try:
       start = time.time_ns()
       network_socket.sendall(meld)
       recmeld = network_socket.recv(1024)
       data:str = bytes.decode(recmeld, 'utf-8')
       for message in data.split(json.dumps("*")):
-        if "139" in message:
-          tid = time.time_ns()-start
-          time_list.append(tid)           
-    except Exception as e:
-            print(e)
-            print("Connection lost")
-            break
+        if message == "":
+          if message is None:
+            message = ""
+            continue
+        else:
+          if "[9, [0, 1, 2, 3, 4, 5, 6, 7]]" in message:
+            tid = time.time_ns()-start
+            time_list.append(tid)           
   time.sleep(1)
-  print(time_list)
+  #print(time_list)
   network_socket.close()
   for i, time_entry in enumerate(time_list):
      newtime = round(float(time_entry)  * (10**-6), 2)
      if newtime >= 3:
        print(f"Entry:{i} with time: {newtime}")
      time_listms.append(newtime)
-  print(time_listms)
+  #print(time_listms)
   print (f'Mean:{statistics.mean(time_listms)}\n Max:{max(time_listms)} \n Min:{min(time_listms)} \n Packets sent: {NoOfPacks} \n Packets recived: {len(time_listms)}')
   return "ok"
 
 if __name__ == "__main__":
     print("Main=client")
-    msg = [[9, [0, 1, 2, 3, 4, 5, 6, 7]]]
+    msg = [9, [0, 1, 2, 3, 4, 5, 6, 7]]
     meld = toJson(msg)
     ip = "10.0.0.2"
     port = 6900

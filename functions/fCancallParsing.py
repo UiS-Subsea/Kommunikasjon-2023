@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
 """
-    @file   commmunicationHandler.py
+    @file   fPacketDecodeParsing.py
     
     @brief  Decode CAN messages and parse to TCP messages
     @date   10.03.23 
     @author Thomas Matre
 """
 
-from functions.fFormating import getBit, getByte, getNum, setBit, toJson
+from functions.fFormating import getBit, getByte, getNum, setBit
 
 def canHBParse(canID, dataByte, ucFlags):
   pack = dataByte[0:6].decode('utf-8')
@@ -66,29 +66,40 @@ def canSensorAlarmsParse(canID, dataByte, ucFlags):
   tempErrors    = [False, False, False, False]
   pressureErrors= [False, False, False, False]
   lekageAlarms  = [False, False, False, False]
-  for i, byte in enumerate(dataByte):
-    if i == 0:
-      for j in range(8):
-        if getBit(byte, j):
-          imuErrors[j] = True
+  for byteidx, byte in enumerate(dataByte):
+    if byteidx == 0:
+      for bit in range(8):
+        if getBit(byte, bit):
+          imuErrors[bit] = True
         else:
-          imuErrors[j] = False
-    elif i == 1:
-      for j in range(4):
-        if getBit(byte, j):
-          tempErrors[j] = True
+          imuErrors[bit] = False
+    elif byteidx == 1:
+      for bit in range(4):
+        if getBit(byte, bit):
+          tempErrors[bit] = True
         else:
-          tempErrors[j] = False
-    elif i == 2:
-      for j in range(4):
-        if getBit(byte, j):
-          pressureErrors[j] = True
+          tempErrors[bit] = False
+    elif byteidx == 2:
+      for bit in range(4):
+        if getBit(byte, bit):
+          pressureErrors[bit] = True
         else:
-          pressureErrors[j] = False
-    elif i == 3:
-      for j in range(4):
-        if getBit(byte, j):
-          lekageAlarms[j] = True
+          pressureErrors[bit] = False
+    elif byteidx == 3:
+      for bit in range(4):
+        if getBit(byte, bit):
+          lekageAlarms[bit] = True
         else:
-          lekageAlarms[j] = False
+          lekageAlarms[bit] = False
   return {canID: (imuErrors, tempErrors, pressureErrors, lekageAlarms)}
+
+def can12VParse(canID, dataByte, ucFlags):
+  alarms  = [False, False, False, False, False, False, False, False]
+  current = getNum("int16", dataByte[0:2])
+  temp    = getNum("int16", dataByte[2:4])
+  for bit in range(8):
+    if getBit(dataByte[7], bit):
+      alarms[bit] = True
+    else:
+      alarms[bit] = False
+  return {canID: (current, temp, alarms)}

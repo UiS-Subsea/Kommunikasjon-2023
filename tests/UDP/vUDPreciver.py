@@ -1,10 +1,11 @@
 import cv2, socket, numpy, pickle
+BUFF_SIZE = 65536
 s=socket.socket(socket.AF_INET , socket.SOCK_DGRAM)
-ip="0.0.0.0"
-port=6666
-s.bind((ip,port))
+s.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,BUFF_SIZE)
+con_adr = ('0.0.0.0', 5000)
+s.bind(con_adr)
 while True:
-    x=s.recvfrom(1000000)
+    x=s.recvfrom(BUFF_SIZE)
     clientip = x[1][0]
     data=x[0]
     data=pickle.loads(data)

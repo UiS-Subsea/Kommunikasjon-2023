@@ -9,7 +9,7 @@
 """
 import can
 import struct
-from functions.fFormating import getBit, getByte, getNum, setBit, toJson
+from functions.fFormating import getBit, getByte, getNum, setBit
 
 can_types = {
     "int8": "<b",
@@ -41,5 +41,4 @@ def packetBuild(tags):
         msg = idDataByte
     except ValueError as error:
       return f"Error in building can message: {tags} "
-    print(msg)
   return can.Message(arbitration_id=canID, data=msg, is_extended_id=False)

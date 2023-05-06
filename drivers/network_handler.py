@@ -167,13 +167,21 @@ if __name__ == "__main__":
         nw.start()
         while True:
             time.sleep(2)
-            inp = input("Send msg?")
+            inp = input("what msg")
             if inp == "a":
+                msg  = [[40, [50, -100, 16, -16, 100, 40, 50, 67]]]
+                msg2 = [[41, [54, -10, 45, -16, 70, 45, 55, 67]]]
+            elif inp == "b":
+                msg = [[66, [2, 0, 0, 0, 0, 0, 0, 0]]]
+            elif inp == "tilt":
+                inpval = input("What tilt value:")
+                msg = [[200, ["tilt", inpval]]]
+            else:
                 msg = [[100, [1000, -1000, 16000, -16000]]]
-
-                
             mess = bytes(json.dumps("*"), "utf-8") + bytes(json.dumps(msg), "utf-8") + bytes(json.dumps("*"), "utf-8")
             client_conn.send(mess)
+            #mess2 = bytes(json.dumps("*"), "utf-8") + bytes(json.dumps(msg2), "utf-8") + bytes(json.dumps("*"), "utf-8")
+            #client_conn.send(mess2)
             #client_conn.send(bytes('*{"can": [(0, 99)]}*', "utf-8"))
         # send_thread = threading.Thread(target=lambda: send_forever(client_conn))
         # send_thread.start()

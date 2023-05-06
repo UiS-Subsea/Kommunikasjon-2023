@@ -1,0 +1,13 @@
+[Unit]
+Description=comhand
+Requires=can0.service
+After=can0.service
+
+[Service]
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/python /jetson/Kommunikasjon-2023/main.py
+WorkingDirectory=/path/to/your/python/
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
