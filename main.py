@@ -10,6 +10,7 @@
 """
 
 import can, time, json, threading, gi, os
+import multiprocessing as mp
 os.chdir(os.path.dirname(os.path.abspath(__file__))) # Bytter working directory til den nåværende slik at programmet kan startes utenfra mappa
 from drivers.network_handler import Network 
 from drivers.STTS75_driver import STTS75; 
@@ -108,9 +109,22 @@ def netThread(netHandler, netCallback, flag):
   netHandler.exit()
   print(f'Network thread stopped')
 
+def canThread(canHandler, canCallback, flag):
+   print("Can recive started\n")
+   flag['Can'] = True
+   while flag['Can']:
+     try:
+       msg = canHandler.recv()
+       if 128 <= msg.arbitration_id <= 159 and flag['Net']:
+         canCallback(msg)
+     except Exception as e:
+       print(f'Feilkode i can thread feilmelding: {e}\n\t{msg}')
+
 #Sends heartbeat and alarm if no response in 1sec.
 def hbThread(netHandler, canSend, systemFlag, ucFlags):
+  print(systemFlag)
   print("Heartbeat thread started")
+  print(systemFlag)
   hbIds = [63, 95 ,125, 126, 127]
   while systemFlag['Can'] and systemFlag['Net']:
     for flag in ucFlags:
@@ -134,16 +148,16 @@ def i2cThread(netHandler, STTS75, systemFlag):
     msg = toJson({'145': (temp)})
     netHandler.send(msg)
     time.sleep(2)
-  print("i2c Thread stopped")
+  print("i2c Thread stopped", systemFlag)
 
 #Class for network controller
 class ComHandler:
   def __init__(self, ip:str='0.0.0.0', port:int=6900, canifaceType:str='socketcan', canifaceName:str='can0') -> None:
     self.canifaceType  = canifaceType
     self.canifaceName  = canifaceName
-    self.status    = {'Net': False, 'Can': False}
-    self.uCstatus  = {'Reg': False, 'Sensor': False, '12Vman': False, '12Vthr': False, '5V': False}
-    self.camStatus = {'Threads': False, 'S1': False, 'S2': False, 'Bottom': False, 'Manipulator': False}
+    self.status    = mp.Manager().dict({'Net': False, 'Can': False})
+    self.uCstatus  = mp.Manager().dict({'Reg': False, 'Sensor': False, '12Vman': False, '12Vthr': False, '5V': False})
+    self.camStatus = mp.Manager().dict({'Threads': False, 'S1': False, 'S2': False, 'Bottom': False, 'Manipulator': False})
     self.canFilters= [{'can_id': 0x80, 'can_mask': 0xE0, 'extended': False}]
     self.connectIp = ip
     self.connectPort = port
@@ -157,21 +171,30 @@ class ComHandler:
   def canInit(self):
     self.bus = can.Bus(interface = self.canifaceType, channel = self.canifaceName, receive_own_messages = False, fd = False)
     self.bus.set_filters(self.canFilters)
-    self.status['Can'] = True
-    self.notifier = can.Notifier(self.bus, [self.canCallback])
+    #self.bus._apply_filters(self.canFilters)
+    self.toggleCan()
+    #self.status['Can'] = True
+    #self.notifier = can.Notifier(self.bus, [self.canCallback])
 
   def netInit(self):
-    self.netHandler = Network(is_server = True, bind_addr = self.connectIp, port = self.connectPort)
-    while self.netHandler.waiting_for_conn:
+    self.netHandler = mp.Manager.Value(Network(is_server = True, bind_addr = self.connectIp, port = self.connectPort))
+    while self.netHandler.value.waiting_for_conn:
       time.sleep(1)
     self.toggleNet()
+
+  def toggleCan(self):
+    if self.status['Can']:
+      self.status['Can'] = False
+    else:
+      self.canProc = mp.Process(target=canThread, daemon=True, args=(self.bus, self.canCallback, self.status))
+      self.canProc.start()
 
   def toggleNet(self):
     if self.status['Net']:
       self.status['Net'] = False
     else:
-      self.netTrad = threading.Thread(name="Network_thread",target=netThread, daemon=True, args=(self.netHandler, self.netCallback, self.status))
-      self.netTrad.start()
+      self.netProc = mp.Process(target=netThread, daemon=True, args=(self.netHandler, self.netCallback, self.status))
+      self.netProc.start()
 
   def netCallback(self, data: bytes) -> None:
     functionsParsingDict  = {
@@ -223,7 +246,7 @@ class ComHandler:
 
   def canCallback(self, msg):
     if self.status['Can'] and self.status['Net']:
-      self.bus.socket.settimeout(0)
+      #self.bus.socket.settimeout(0)
       try:
         canID = msg.arbitration_id
         dataByte = msg.data
