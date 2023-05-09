@@ -224,20 +224,14 @@ class ComHandler:
   def canCallback(self, msg):
     if self.status['Can'] and self.status['Net']:
       self.bus.socket.settimeout(0)
-      try:
-        canID = msg.arbitration_id
-        dataByte = msg.data
-        try:
-          if canID in canReciveDict:
+      canID = msg.arbitration_id
+      dataByte = msg.data
+      if canID in canReciveDict:
             jsonDict = canReciveDict[canID](canID, dataByte, self.uCstatus)
-          else:
+      else:
             print(f"CanID: {canID} recived from ROV system not in parsing dict msg: {msg}")
             jsonDict = {"Error": f"CanID: {canID} recived from ROV system not in parsing dict with"}
-        except TypeError as e:
-            jsonDict = {"Error": e}      
-        self.sendTcpPacket(jsonDict)
-      except Exception as e:
-        print(f'Feilkode i canCallback, feilmelding: {e}\n\t{dataByte}')
+      self.sendTcpPacket(jsonDict)
         
   def heartBeat(self):
     self.heartBeatThread = threading.Thread(name="hbThread",target=hbThread, daemon=True, args=(self.netHandler, self.sendCanPacket, self.status, self.uCstatus))
