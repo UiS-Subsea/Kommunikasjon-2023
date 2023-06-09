@@ -274,12 +274,13 @@ class ComHandler:
     elif pipeId == 'stereo2':
       self.stereo2Pipe.runPipe()
       self.camStatus['S2'] = True
-    elif pipeId == 'bottom' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
+    elif pipeId == 'bottom' and (self.camStatus['S1'] or self.camStatus['S2']): #freak bug where one of stereo cams must be running to start usb cams.
       self.bottomPipe.runPipe()
       self.camStatus['bottom'] = True
-    elif pipeId == 'manipulator' and self.camStatus['S1'] or self.camStatus['S2']: #freak bug where one of stereo cams must be running to start usb cams.
+    elif pipeId == 'manipulator' and (self.camStatus['S1'] or self.camStatus['S2']): #freak bug where one of stereo cams must be running to start usb cams.
       self.manipulatorPipe.runPipe()
       self.camStatus['manipulator'] = True
+    print(f"Camera: {pipeId} started")
     self.sendTcpPacket(f"Camera: {pipeId} started")
      
   def camStop(self, pipeId):
